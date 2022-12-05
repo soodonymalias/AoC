@@ -1,0 +1,124 @@
+<body>
+<script>
+let real_input = ["###..#..", ".#######", "#####...", "#..##.#.", "###..##.", "##...#..", "..#...#.", ".#....##"];
+
+let test_input = [".#.", "..#", "###"];
+
+let iterations = 6;
+
+function initArrays(len) {
+  let array = new Array(len);
+  for (let i = 0; i < len; i++) {
+    array[i] = new Array(len);
+    for (let j = 0; j < len; j++)
+      array[i][j] = new Array(len);
+  }
+  return array;
+}
+
+function part1(input) {
+  let len = input.length + (2*iterations);
+  let cubes = initArrays(len);
+
+  for (let i = 0; i < input.length; i++) {
+    let row = input[i];
+    for (let j = 0; j < row.length; j++) {
+	  if (row[j] == "#")
+	    cubes[i+iterations][j+iterations][iterations] = true;
+	}
+  }
+
+  for (let run = 0; run < iterations; run++) {
+    let next_cubes = initArrays(len);
+    for (let i = 0; i < len; i++) {
+      for (let j = 0; j < len; j++) {
+        for (let k = 0; k < len; k++) {
+		  let activeNeighborCount = 0;
+	      for (let x = i-1; x <= i+1; x++) {
+	        for (let y = j-1; y <= j+1; y++) {
+	          for (let z = k-1; z <= k+1; z++) {
+			    if (x < 0 || y < 0 || z < 0) continue;
+				if (x >= len || y >= len || z >= len) continue;
+				if (x == i && y == j && z == k) continue;
+				if (cubes[x][y][z]) activeNeighborCount++;
+			  }
+			}
+		  }
+		  if (activeNeighborCount == 3 || (activeNeighborCount == 2 && cubes[i][j][k]))
+		    next_cubes[i][j][k] = true;
+		}
+	  }
+	}
+	cubes = next_cubes;
+  }
+
+  let active_count = 0;
+  for (let i = 0; i < len; i++) {
+    for (let j = 0; j < len; j++) {
+      for (let k = 0; k < len; k++) {
+	    if (cubes[i][j][k]) active_count++;
+      }
+	}
+  }
+  return active_count;
+}
+
+
+function part2(input) {
+  let cubes = new Set();
+
+  for (let i = 0; i < input.length; i++) {
+    let row = input[i];
+    for (let j = 0; j < row.length; j++) {
+	  if (row[j] == "#")
+	    cubes.add(i+","+j+",0,0");
+	}
+  }
+
+  for (let run = 0; run < iterations; run++) {
+    let neighbors = new Map();
+	for (cube of cubes) {
+	  let cube_coords = cube.split(",");
+	  let cube_i = parseInt(cube_coords[0]);
+	  let cube_j = parseInt(cube_coords[1]);
+	  let cube_k = parseInt(cube_coords[2]);
+	  let cube_l = parseInt(cube_coords[3]);
+	  for (let i = cube_i-1; i <= cube_i+1; i++) {
+	    for (let j = cube_j-1; j <= cube_j+1; j++) {
+		  for (let k = cube_k-1; k <= cube_k+1; k++) {
+	        for (let l = cube_l-1; l <= cube_l+1; l++) {
+			  if (cube_i == i && cube_j == j && cube_k == k && cube_l == l) continue;
+			  let neighbor_key = i+","+j+","+k+","+l;
+			  let count = neighbors.has(neighbor_key) ? neighbors.get(neighbor_key) : 0;
+			  neighbors.set(neighbor_key, count + 1);
+			}
+		  }
+		}
+	  }
+	}
+	let next_cubes = new Set();
+	neighbors.forEach((count, key) => {
+	  if (count == 3 || (count == 2 && cubes.has(key)))
+	    next_cubes.add(key);
+	});
+	cubes = next_cubes;
+  }
+
+  return cubes.size;
+}
+
+window.onload = () => {
+  let start_time = performance.now();
+  let input = real_input;
+
+  document.body.appendChild(document.createTextNode("Part one: " + part1(input)));
+  document.body.appendChild(document.createElement("br"));
+
+  document.body.appendChild(document.createTextNode("Part two: " + part2(input)));
+  document.body.appendChild(document.createElement("br"));
+
+  let runtime = performance.now() - start_time;
+  document.body.appendChild(document.createTextNode("Runtime: " + runtime + "ms"));
+}
+</script>
+</body>

@@ -1,0 +1,48 @@
+<body>
+<script>
+let real_input = [8,0,17,4,1,12];
+
+let test_input = [0,3,6];
+
+function go(input, end) {
+  let nums = new Map();
+  for (let i = 0; i < input.length; i++)
+    nums.set(input[i], [i]);
+
+  let prev = input[input.length - 1];
+  for (let i = input.length; i < end; i++) {
+    let curr;
+	let prevRecord = nums.get(prev);
+    if (prevRecord.length == 1)
+	  curr = 0;
+	else
+	  curr = i - 1 - prevRecord[prevRecord.length - 2];
+	let currRecord = nums.get(curr);
+	if (currRecord == undefined)
+      nums.set(curr, [i]);
+	else
+	  currRecord.push(i);
+	prev = curr;
+  }
+  return prev;
+}
+
+
+function part2(input) {
+}
+
+window.onload = () => {
+  let start_time = performance.now();
+  let input = real_input;
+
+  document.body.appendChild(document.createTextNode("Part one: " + go(input, 2000)));
+  document.body.appendChild(document.createElement("br"));
+
+  document.body.appendChild(document.createTextNode("Part two: " + go(input, 30000000)));
+  document.body.appendChild(document.createElement("br"));
+
+  let runtime = performance.now() - start_time;
+  document.body.appendChild(document.createTextNode("Runtime: " + runtime + "ms"));
+}
+</script>
+</body>

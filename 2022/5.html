@@ -1,0 +1,76 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function part1(inputs) {
+  let stacks = new Array(Math.ceil(inputs[0].length / 4));
+  for (let a = 0; a < stacks.length; a++)
+    stacks[a] = new Array();
+
+  let start_position_done = false;
+  for (let i of inputs) {
+    if (!start_position_done) {
+      if (i.length == 0) {
+        start_position_done = true;
+        for (let s of stacks)
+          s.reverse();
+        continue;
+      }
+      if (i[1] == "1") continue;
+      for (let j = 1; j < i.length; j+=4) {
+        if (i.charAt(j) != ' ')
+          stacks[Math.floor(j/4)].push(i.charAt(j));
+      }
+    }
+ 
+    let command = i.split(" ");
+    let move_count = parseInt(command[1]);
+    let source = stacks[parseInt(command[3]) - 1];
+    let dest = stacks[parseInt(command[5]) - 1];
+    for (let m = 0; m < move_count; m++)
+      dest.push(source.pop());
+  }
+  let result = "";
+  for (let s of stacks)
+    result += s[s.length-1];
+  return result;
+}
+
+function part2(inputs) {
+  let stacks = new Array(Math.ceil(inputs[0].length / 4));
+  for (let a = 0; a < stacks.length; a++)
+    stacks[a] = new Array();
+
+  let start_position_done = false;
+  for (let i of inputs) {
+    if (!start_position_done) {
+      if (i.length == 0) {
+        start_position_done = true;
+        for (let s of stacks)
+          s.reverse();
+        continue;
+      }
+      if (i[1] == "1") continue;
+      for (let j = 1; j < i.length; j+=4) {
+        if (i.charAt(j) != ' ')
+          stacks[Math.floor(j/4)].push(i.charAt(j));
+      }
+    }
+ 
+    let command = i.split(" ");
+    let move_count = parseInt(command[1]);
+    let source = stacks[parseInt(command[3]) - 1];
+    let dest = stacks[parseInt(command[5]) - 1];
+    let tmp = [];
+    for (let m = 0; m < move_count; m++)
+      tmp.push(source.pop());
+    for (let m = 0; m < move_count; m++)
+      dest.push(tmp.pop());
+  }
+  let result = "";
+  for (let s of stacks)
+    result += s[s.length-1];
+  return result;
+}
+
+</script>
+</body>

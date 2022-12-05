@@ -1,0 +1,38 @@
+<body>
+<script>
+let real_input = [13316116, 13651422];
+
+let test_input = [5764801, 17807724];
+
+function t(n, s) {
+  return (n*s) % 20201227;
+}
+
+window.onload = () => {
+  let start_time = performance.now();
+  let input = real_input;
+
+  let n = 1;
+  let loop = 0;
+  do {
+    loop++;
+    n = t(n, 7);
+  } while (n != input[0]);
+
+  console.log(loop);
+  n = 1;
+  for (; loop > 0; loop--) {
+    n = t(n, input[1]);
+  }
+
+  document.body.appendChild(document.createTextNode("Part one: " + n));
+  document.body.appendChild(document.createElement("br"));
+
+  document.body.appendChild(document.createTextNode("Part two: "));
+  document.body.appendChild(document.createElement("br"));
+
+  let runtime = performance.now() - start_time;
+  document.body.appendChild(document.createTextNode("Runtime: " + runtime + "ms"));
+}
+</script>
+</body>

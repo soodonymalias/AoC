@@ -1,0 +1,32 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function part1(inputs) {
+  let sum = 0;
+  let results = { "A": { "X" : 3, "Y" : 6, "Z" : 0 },
+               "B": { "X" : 0, "Y" : 3, "Z" : 6 },
+               "C": { "X" : 6, "Y" : 0, "Z" : 3 }};
+  let playpoints = { "X": 1, "Y" : 2, "Z" : 3 };
+  for (let i of inputs) {
+    let plays = i.split(" ");
+    sum += results[plays[0]][plays[1]];
+    sum += playpoints[plays[1]];
+  }
+  return sum;
+}
+
+function part2(inputs) {
+  let sum = 0;
+  let results = { "X": 0, "Y" : 3, "Z" : 6 };
+  let playpoints = { "A": { "X" : 3, "Y" : 1, "Z" : 2 },
+                     "B": { "X" : 1, "Y" : 2, "Z" : 3 },
+                     "C": { "X" : 2, "Y" : 3, "Z" : 1 }};
+  for (let i of inputs) {
+    let plays = i.split(" ");
+    sum += results[plays[1]];
+    sum += playpoints[plays[0]][plays[1]];
+  }
+  return sum;
+}
+</script>
+</body>

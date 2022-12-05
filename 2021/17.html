@@ -1,0 +1,53 @@
+<body>
+<script>
+let start_time = performance.now();
+let max_x = 73; let min_x = 29; let max_y = -194; let min_y = -248;
+//let max_x = 30; let min_x = 20; let max_y = -5; let min_y = -10;
+
+function fire(x_vel, y_vel) {
+  let x = 0;
+  let y = 0;
+  let y_peak = min_y;
+  while (y >= min_y) {
+    x += x_vel;
+    y += y_vel;
+    if (y > y_peak) y_peak = y;
+
+    if (x_vel > 0) x_vel--;
+    else if (x_vel < 0) x_vel++;
+    y_vel--;
+
+    if (x <= max_x && x >= min_x && y <= max_y && y >= min_y)
+      return y_peak;
+  }
+}
+
+let valid = 0;
+let max_peak = min_y;
+for (let x_vel = Math.round(Math.sqrt(min_x)); x_vel <= max_x; x_vel++) {
+  for (let y_vel = min_y; y_vel <= Math.abs(min_y); y_vel++) {
+    let peak = fire(x_vel, y_vel);
+    if (peak != undefined) {
+      valid++;
+      if (peak > max_peak)
+        max_peak = peak;
+    }
+  }
+}
+
+function part1() {
+  return max_peak;
+}
+
+function part2() {
+  return valid;
+}
+
+document.body.appendChild(document.createTextNode("Part 1: " + part1()));
+document.body.appendChild(document.createElement("br"));
+document.body.appendChild(document.createTextNode("Part 2: " + part2()));
+document.body.appendChild(document.createElement("br"));
+let runtime = performance.now() - start_time;
+document.body.appendChild(document.createTextNode("Runtime: " + Math.round(runtime) + "ms"));
+</script>
+</body>

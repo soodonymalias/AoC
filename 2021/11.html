@@ -1,0 +1,83 @@
+<body>
+<script>
+let start_time = performance.now();
+let inputs = ["7612648217", "7617237672", "2853871836", "7214367135", "1533365614", "6258172862", "5377675583", "5613268278", "8381134465", "3445428733"];
+//let inputs = ["5483143223", "2745854711", "5264556173", "6141336146", "6357385478", "4167524645", "2176841721", "6882881134", "4846848554", "5283751526"];
+let len = inputs.length;
+
+let grid = [];
+for (let i in inputs) {
+  let row = []
+  for (let j in inputs[i]) row.push(parseInt(inputs[i].charAt(j)));
+  grid.push(row);
+}
+
+function round() {
+  let flashesToProcess = [];
+
+  let allFlashes = [];
+  for (let a = 0; a < 10; a++)
+    allFlashes.push(new Array(10).fill(false));
+      
+  for (let x in grid) {
+    for (let y in grid[x]) {
+      grid[x][y] += 1;
+      if (grid[x][y] > 9) {
+        flashesToProcess.push({x: x, y: y});
+        allFlashes[x][y] = true;
+      }
+    }
+  }
+
+  while (flashesToProcess.length > 0) {
+    let flash = flashesToProcess.pop();
+    let flashX = parseInt(flash.x);
+    let flashY = parseInt(flash.y);
+    grid[flashX][flashY] = 0;
+    for (let x = -1; x <= 1; x++) {
+      for (let y = -1; y <= 1; y++) {
+        if (x == 0 && y == 0) continue;
+        let nextX = flashX + x;
+        let nextY = flashY + y;
+        if (nextX < 0 || nextX > 9 || nextY < 0 || nextY > 9) continue;
+        if (allFlashes[nextX][nextY]) continue;
+        grid[nextX][nextY] += 1;
+        if (grid[nextX][nextY] > 9) {
+          flashesToProcess.push({x: nextX, y: nextY});
+          allFlashes[nextX][nextY] = true;
+        }
+      }
+    }
+  }
+
+  let flashCount = 0;
+  for (let j in allFlashes) {
+    for (let k in allFlashes[j]) {
+      if (allFlashes[j][k]) flashCount++;
+    }
+  }
+  return flashCount;
+}
+
+function part1() {
+  let result = 0;
+  for (let i = 0; i < 100; i++) {
+    result += round();
+  }
+  return result;
+}
+
+function part2() {
+  let currentRound = 101;
+  while (round() != 100) currentRound++;
+  return currentRound;
+}
+
+document.body.appendChild(document.createTextNode("Part 1: " + part1()));
+document.body.appendChild(document.createElement("br"));
+document.body.appendChild(document.createTextNode("Part 2: " + part2()));
+document.body.appendChild(document.createElement("br"));
+let runtime = performance.now() - start_time;
+document.body.appendChild(document.createTextNode("Runtime: " + runtime + "ms"));
+</script>
+</body>

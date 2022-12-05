@@ -1,0 +1,80 @@
+<body>
+<script>
+let start_time = performance.now();
+let inputs = ["VJ-nx", "start-sv", "nx-UL", "FN-nx", "FN-zl", "end-VJ", "sv-hi", "em-VJ", "start-hi", "sv-em", "end-zl", "zl-em", "hi-VJ", "FN-em", "start-VJ", "jx-FN", "zl-sv", "FN-sv", "FN-hi", "nx-end"];
+let len = inputs.length;
+
+function makeVertex(id) {
+  return { id: id, edges: [], big: id == id.toUpperCase(), visitCount: 0}
+}
+
+let graph = new Map();
+for (let i in inputs) {
+  let edge = inputs[i].split("-");
+  let v1 = graph.get(edge[0]);
+  if (v1 == undefined) {
+    v1 = makeVertex(edge[0]);
+    graph.set(edge[0], v1);
+  }
+  let v2 = graph.get(edge[1]);
+  if (v2 == undefined) {
+    v2 = makeVertex(edge[1]);
+    graph.set(edge[1], v2);
+  }
+  v1.edges.push(v2);
+  v2.edges.push(v1);
+}
+
+let part1_result = 0;
+function visit1(curr) {
+  curr.visitCount++;
+  for (let e in curr.edges) {
+    let edge = curr.edges[e];
+    if (edge.id == "end") {
+      part1_result++;
+      continue;
+    }
+    if (edge.big || edge.visitCount < 1)
+      visit1(edge);
+  }
+  curr.visitCount--;
+}
+
+let part2_result = 0;
+let second_visit_in_use = false;
+function visit2(curr) {
+  curr.visitCount++;
+  if (curr.visitCount == 2 && !curr.big) second_visit_in_use = true;
+  for (let e in curr.edges) {
+    let edge = curr.edges[e];
+    if (edge.id == "end") {
+      part2_result++;
+      continue;
+    }
+    if (edge.big || edge.visitCount < 1 ||
+        (edge.id != "start" && !second_visit_in_use && edge.visitCount == 1)) {
+      visit2(edge);
+    }
+  }
+  if (curr.visitCount == 2 && !curr.big) second_visit_in_use = false;
+  curr.visitCount--;
+}
+
+function part1() {
+  visit1(graph.get("start"));
+  return part1_result;
+}
+
+function part2() {
+  visit2(graph.get("start"));
+  return part2_result;
+}
+
+document.body.appendChild(document.createTextNode("Part 1: " + part1()));
+document.body.appendChild(document.createElement("br"));
+document.body.appendChild(document.createTextNode("Part 2: " + part2()));
+document.body.appendChild(document.createElement("br"));
+let runtime = performance.now() - start_time;
+document.body.appendChild(document.createTextNode("Runtime: " + Math.round(runtime) + "ms"));
+</script>
+</body>

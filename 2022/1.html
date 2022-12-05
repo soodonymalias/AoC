@@ -1,0 +1,29 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let elves = [];
+  let currentElf = 0;
+  for (let i of inputs) {
+    if (i == "") {
+      elves.push(currentElf);
+      currentElf = 0;
+      continue;
+    }
+    currentElf += parseInt(i);
+  }
+  if (currentElf != 0)
+    elves.push(currentElf);
+  elves.sort((a,b) => a < b ? 1 : -1);
+  return elves;
+}
+
+function part1(elves) {
+  return elves[0];
+}
+
+function part2(elves) {
+  return elves[0] + elves[1] + elves[2];
+}
+</script>
+</body>

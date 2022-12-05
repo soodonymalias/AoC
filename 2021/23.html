@@ -1,0 +1,171 @@
+<body>
+<script>
+let start_time = performance.now();
+
+let innerLength = 4;
+//let innerLength = 2;
+
+function validHallwaySpots(cave_index, caves, hallway) {
+  let spots = [];
+  let start = 2 + (2*cave_index);
+  let exit_cost = 1 + innerLength - caves[cave_index].length;
+  for (let i = start; start >= 0; i--) {
+    if (i == 2 || i == 4 || i == 6 || i == 8) continue;
+    if (hallway[i] != '') break;
+    spots.push({index: i, cost: exit_cost + Math.abs(start - i)});
+  }
+  for (let i = start; start < hallway.length; i++) {
+    if (i == 2 || i == 4 || i == 6 || i == 8) continue;
+    if (hallway[i] != '') break;
+    spots.push({index: i, cost: exit_cost + Math.abs(start - i)});
+  }
+  return spots;
+}
+
+function isEmptied(i, caves) {
+  let expected;
+  if (i == 0) expected = 'A';
+  if (i == 1) expected = 'B';
+  if (i == 2) expected = 'C';
+  if (i == 3) expected = 'D';
+  for (let a of caves[i]) if (a != expected) return false;
+  return true;
+}
+
+function letterToCost(val) {
+  if (val == 'A') return 1;
+  if (val == 'B') return 10;
+  if (val == 'C') return 100;
+  if (val == 'D') return 1000;
+}
+
+function done(caves) {
+  for (let c of caves) if (c.length != innerLength) return false;
+  for (let a of caves[0]) if (a != 'A') return false;
+  for (let a of caves[1]) if (a != 'B') return false;
+  for (let a of caves[2]) if (a != 'C') return false;
+  for (let a of caves[3]) if (a != 'D') return false;
+  return true;
+}
+
+function canReach(start, target, hallway) {
+  for (let i = Math.min(start, target) + 1; i < Math.max(start, target); i++) {
+    if (hallway[i] != '') return false;
+  }
+  return true;
+}
+
+function moveHome(caves, hallway) {
+  let score = 0;
+
+  for (let i in hallway) {
+    if (hallway[i] == '') continue;
+    if (hallway[i] == 'A') {
+      if (!isEmptied(0, caves)) continue;
+      if (!canReach(i, 2, hallway)) continue;
+      score += (Math.abs(i-2) + innerLength - caves[0].length)*1;
+      caves[0].push('A');
+      hallway[i] = '';
+    }
+    if (hallway[i] == 'B') {
+      if (!isEmptied(1, caves)) continue;
+      if (!canReach(i, 4, hallway)) continue;
+      score += (Math.abs(i-4) + innerLength - caves[1].length)*10;
+      caves[1].push('B');
+      hallway[i] = '';
+    }
+    if (hallway[i] == 'C') {
+      if (!isEmptied(2, caves)) continue;
+      if (!canReach(i, 6, hallway)) continue;
+      score += (Math.abs(i-6) + innerLength - caves[2].length)*100;
+      caves[2].push('C');
+      hallway[i] = '';
+    }
+    if (hallway[i] == 'D') {
+      if (!isEmptied(3, caves)) continue;
+      if (!canReach(i, 8, hallway)) continue;
+      score += (Math.abs(i-8) + innerLength - caves[3].length)*1000;
+      caves[3].push('D');
+      hallway[i] = '';
+    }
+  }
+  if (score != 0)
+    score += moveHome(caves, hallway);
+  return score;
+}
+
+let lowestScore = 51768;
+
+function move(score, caves, hallway, depth) {
+  if (score >= lowestScore) return;
+  score += moveHome(caves, hallway);
+  if (score >= lowestScore) return;
+
+  if (done(caves)) {
+    lowestScore = score;
+    return;
+  }
+
+  for (let i in caves) {
+    if (isEmptied(i, caves)) continue;
+    let spots = validHallwaySpots(i, caves, hallway);
+    for (let s of spots) {
+      let new_hallway = new Array(11);
+      for (let i = 0; i < 11; i++) new_hallway[i] = hallway[i];
+      let new_caves = [];
+      for (let i = 0; i < caves.length; i++) {
+        let cave = [];
+        for (let j = 0; j < caves[i].length; j++) cave.push(caves[i][j]);
+        new_caves.push(cave);
+      }
+      let val = new_caves[i].pop();
+      new_hallway[s.index] = val;
+      move(score+(s.cost*letterToCost(val)), new_caves, new_hallway, depth+1);
+    }
+  }
+}
+
+function part1() {
+}
+
+function part2() {
+  let caves = [];
+  for (let i = 0; i < 4; i++) caves.push(new Array(innerLength));
+/*caves[0][0] = 'B';
+caves[0][1] = 'A';
+caves[1][0] = 'D';
+caves[1][1] = 'C';
+caves[2][0] = 'A';
+caves[2][1] = 'C';
+caves[3][0] = 'B';
+caves[3][1] = 'D';*/
+caves[0][0] = 'B';
+caves[0][1] = 'D';
+caves[0][2] = 'D';
+caves[0][3] = 'A';
+caves[1][0] = 'D';
+caves[1][1] = 'B';
+caves[1][2] = 'C';
+caves[1][3] = 'C';
+caves[2][0] = 'A';
+caves[2][1] = 'A';
+caves[2][2] = 'B';
+caves[2][3] = 'C';
+caves[3][0] = 'B';
+caves[3][1] = 'C';
+caves[3][2] = 'A';
+caves[3][3] = 'D';
+
+  let hallway = new Array(11).fill('');
+  move(0, caves, hallway, 1);
+  return lowestScore;
+}
+
+document.body.appendChild(document.createTextNode("Part 1: " + part1()));
+document.body.appendChild(document.createElement("br"));
+document.body.appendChild(document.createTextNode("Part 2: " + part2()));
+document.body.appendChild(document.createElement("br"));
+let runtime = performance.now() - start_time;
+document.body.appendChild(document.createTextNode("Runtime: " + Math.round(runtime) + "ms"));
+</script>
+</body>

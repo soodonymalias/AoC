@@ -1,0 +1,53 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+
+function toPriority(c) {
+  let charCode = c.charCodeAt(0);
+  if (charCode >= 'A'.charCodeAt(0) && charCode <= 'Z'.charCodeAt(0))
+    return 27 + charCode - 'A'.charCodeAt(0);
+  return 1 + charCode - 'a'.charCodeAt(0);
+}
+
+function part1(inputs) {
+  let sum = 0;
+  for (let i of inputs) {
+    let first = new Set();
+    for (let j = 0; j < i.length / 2; j++)
+      first.add(i.at(j));
+
+    for (let j = i.length / 2; j < i.length; j++) {
+      if (first.has(i.at(j))) {
+        sum += toPriority(i.at(j));
+        break;
+      }
+    }
+  }
+  return sum;
+}
+
+function part2(inputs) {
+  let sum = 0;
+  for (let i = 0; i < inputs.length; i+=3) {
+    let first = new Set();
+    for (let j = 0; j < inputs[i].length; j++)
+      first.add(inputs[i].at(j));
+
+    let second = new Set();
+    for (let j = 0; j < inputs[i+1].length; j++) {
+      if (first.has(inputs[i+1].at(j)))
+        second.add(inputs[i+1].at(j));
+    }
+
+    for (let j = 0; j < inputs[i+2].length; j++) {
+      if (second.has(inputs[i+2].at(j))) {
+        sum += toPriority(inputs[i+2].at(j));
+        break;
+      }
+    }
+  }
+  return sum;
+}
+
+</script>
+</body>

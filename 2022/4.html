@@ -1,0 +1,37 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function part1(inputs) {
+  let subsets = 0;
+  for (let i of inputs) {
+    let elves = i.split(",");
+    let elf1_start = parseInt(elves[0].split("-")[0]);
+    let elf1_end = parseInt(elves[0].split("-")[1]);
+    let elf2_start = parseInt(elves[1].split("-")[0]);
+    let elf2_end = parseInt(elves[1].split("-")[1]);
+    if (elf1_start <= elf2_start && elf1_end >= elf2_end)
+      subsets++;
+    else if (elf1_start >= elf2_start && elf1_end <= elf2_end)
+      subsets++;
+  }
+  return subsets;
+}
+
+function part2(inputs) {
+  let overlaps = 0;
+  for (let i of inputs) {
+    let elves = i.split(",");
+    let elf1_start = parseInt(elves[0].split("-")[0]);
+    let elf1_end = parseInt(elves[0].split("-")[1]);
+    let elf2_start = parseInt(elves[1].split("-")[0]);
+    let elf2_end = parseInt(elves[1].split("-")[1]);
+    if (elf1_start <= elf2_end && elf1_end >= elf2_start)
+      overlaps++;
+    else if (elf1_start >= elf2_end && elf1_end <= elf2_start)
+      overlaps++;
+  }
+  return overlaps;
+}
+
+</script>
+</body>

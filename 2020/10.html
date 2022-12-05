@@ -1,0 +1,65 @@
+<body>
+<script>
+let real_input = ["47", "99", "115", "65", "10", "55", "19", "73", "80", "100", "71", "110", "64", "135", "49", "3", "1", "98", "132", "2", "38", "118", "66", "116", "104", "87", "79", "114", "40", "37", "44", "97", "4", "140", "60", "86", "56", "133", "7", "146", "85", "111", "134", "53", "121", "77", "117", "21", "12", "81", "145", "129", "107", "93", "22", "48", "11", "54", "92", "78", "67", "20", "138", "125", "57", "96", "26", "147", "124", "34", "74", "143", "13", "28", "126", "50", "29", "70", "39", "63", "41", "91", "32", "84", "144", "27", "139", "33", "88", "72", "23", "103", "16"];
+
+let test_input = ["16", "10", "15", "5", "1", "11", "7", "19", "6", "12", "4"];
+let test_input2 = ["28", "33", "18", "42", "31", "14", "46", "20", "48", "47", "24", "23", "49", "45", "19", "38", "39", "11", "1", "32", "25", "35", "8", "17", "7", "9", "4", "2", "34", "10", "3"];
+
+function getChargers(input) {
+  let chargers = new Array(input.length);
+  for (let i = 0; i < input.length; i++)
+    chargers[i] = parseInt(input[i]);
+  chargers.sort((a,b) => a - b);
+  return chargers;
+}
+
+function calculatePart1(chargers) {
+  let diff1 = 0;
+  let diff3 = 1;
+
+  if (chargers[0] == 1) diff1++;
+  else if (chargers[0] == 3) diff3++;
+  else console.log("UHOH");
+  
+  for (let i = 1; i < chargers.length; i++) {
+    let diff = chargers[i] - chargers[i-1];
+	if (diff == 1) diff1++;
+	else if (diff == 3) diff3++;
+	else console.log("UHOH");
+  }
+  return diff1 * diff3;
+}
+
+function calculatePart2(chargers) {
+  let charger_set = new Set();
+  for (let i = 0; i < chargers.length; i++)
+    charger_set.add(chargers[i]);
+ 
+  let memos = new Array(chargers[chargers.length - 1] + 1);
+  memos[0] = 1;
+  memos[1] = charger_set.has(1) ? 1 : 0;
+  memos[2] = charger_set.has(2) ? memos[0] + memos[1] : 0;
+  
+  for (let i = 3; i < memos.length; i++) {
+    if (!charger_set.has(i))
+	  memos[i] = 0;
+	else
+	  memos[i] = memos[i-1] + memos[i-2] + memos[i-3];
+  }
+  return memos[memos.length-1];
+}
+
+window.onload = () => {
+  let chargers = getChargers(real_input);
+  let part1 = calculatePart1(chargers);
+
+  document.body.appendChild(document.createTextNode("Part one: " + part1));
+  document.body.appendChild(document.createElement("br"));
+
+  let part2 = calculatePart2(chargers);
+
+  document.body.appendChild(document.createTextNode("Part two: " + part2));
+  document.body.appendChild(document.createElement("br"));
+}
+</script>
+</body>

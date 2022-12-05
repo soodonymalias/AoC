@@ -1,0 +1,117 @@
+<body>
+<script>
+let real_input = [39, 15, 13, 23, 12, 49, 36, 44, 8, 21, 28, 37, 40, 42, 6, 47, 2, 38, 18, 31, 20, 10, 16, 43, 5, -1, 29, 26, 19, 35, 34, 4, 41, 11, 3, 50, 33, 22, 48, 7, 17, 32, 27, 45, 46, 9, 25, 30, 1, 24, 14];
+
+let test_input = [9, 2, 6, 3, 1, -1, 5, 8, 4, 7, 10];
+let test_input2 = [43, 19, -1, 2, 29, 14];
+
+function part1(p1, p2) {
+  while (p1.length > 0 && p2.length > 0) {
+    let c1 = p1.shift();
+    let c2 = p2.shift();
+    if (c2 > c1) {
+      p2.push(c2);
+      p2.push(c1);
+    } else {
+      p1.push(c1);
+      p1.push(c2);
+    }
+  }
+  let winner = p1.length == 0 ? p2 : p1;
+  let result = 0;
+  for (let i = 1; i <= winner.length; i++) {
+    result += i * winner[winner.length - i];
+  }
+  return result;
+}
+
+let final_winner = null;
+
+function recursiveCombat(p1, p2) {
+  let states = new Map();
+  while (p1.length > 0 && p2.length > 0) {
+    let state = [[...p1], [...p2]];
+    let lazy_hash = p1.length*31 + p1[0]*17 + p2[0]*11;
+    if (!states.has(lazy_hash))
+      states.set(lazy_hash, new Array());
+    for (entry of states.get(lazy_hash)) {
+      if (p1.length != entry[0].length) continue;
+      let identical = true;
+      for (let i = 0; identical && i < p1.length; i++) {
+        if (p1[i] != entry[0][i]) identical = false;
+      };
+      for (let i = 0; identical && i < p2.length; i++) {
+        if (p2[i] != entry[1][i]) identical = false;
+      }
+      if (identical) {
+        final_winner = p1;
+        return true;
+      }
+    }
+    states.get(lazy_hash).push(state);
+
+    let c1 = p1.shift();
+    let c2 = p2.shift();
+    let p1_won;
+    if (p1.length >= c1 && p2.length >= c2) {
+      let recursive_p1 = new Array(c1);
+      for (let i = 0; i < c1; i++)
+        recursive_p1[i] = p1[i];
+      let recursive_p2 = new Array(c2);
+      for (let i = 0; i < c2; i++)
+        recursive_p2[i] = p2[i];
+      p1_won = recursiveCombat(recursive_p1, recursive_p2);
+    } else {
+      p1_won = c1 > c2;
+    }
+    if (p1_won) {
+      p1.push(c1);
+      p1.push(c2);
+    } else {
+      p2.push(c2);
+      p2.push(c1);
+    }
+  }
+  let p1_won_match = p1.length != 0;
+  final_winner = p1_won_match ? p1 : p2;
+  return p1_won_match;
+}
+
+function part2(p1, p2) {
+  let p1_won = recursiveCombat(p1, p2);
+  let result = 0;
+  for (let i = 1; i <= final_winner.length; i++) {
+     result += i * final_winner[final_winner.length - i];
+  }
+  return result;
+}
+
+window.onload = () => {
+  let start_time = performance.now();
+  let input = real_input;
+
+  let p1 = new Array();
+  let p2 = new Array();
+  let p1_done = false
+  for (i of input) {
+    if (i == -1) {
+      p1_done = true;
+      continue;
+    }
+    if (!p1_done)
+      p1.push(i);
+    else
+      p2.push(i)
+  }
+
+  //document.body.appendChild(document.createTextNode("Part one: " + part1([...p1], [...p2])));
+  //document.body.appendChild(document.createElement("br"));
+
+  document.body.appendChild(document.createTextNode("Part two: " + part2(p1, p2)));
+  document.body.appendChild(document.createElement("br"));
+
+  let runtime = performance.now() - start_time;
+  document.body.appendChild(document.createTextNode("Runtime: " + runtime + "ms"));
+}
+</script>
+</body>

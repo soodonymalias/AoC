@@ -1,0 +1,67 @@
+<body>
+<script>
+let real_input = ["1002460", "29,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,41,x,x,x,x,x,x,x,x,x,601,x,x,x,x,x,x,x,23,x,x,x,x,13,x,x,x,17,x,19,x,x,x,x,x,x,x,x,x,x,x,463,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,37"];
+
+let test_input = ["939", "7,13,x,x,59,x,31,19"];
+
+function part1(now, buses) {
+  let earliest_bus = -1;
+  let departure_time = Number.MAX_SAFE_INTEGER;
+  for (bus of buses) {
+    if (bus == -1) continue;
+	let bus_dep = bus - (now % bus);
+	if (bus_dep >= departure_time) continue;
+	departure_time = bus_dep;
+	earliest_bus = bus;
+  }
+  return earliest_bus * departure_time;
+}
+
+function isValid(t, buses) {
+  for (let i = 0; i < buses.length; i++) {
+    if (buses[i] == -1) continue;
+	if ((t + i) % buses[i] != 0)
+	  return false;
+  }
+  return true;
+}
+
+function lcm(a, b) {
+  let result = a;
+  while (result % b != 0) result += a;
+  return result;
+}
+
+function part2(buses) {
+  let lcmSoFar = buses[0];
+  let resultSoFar = buses[0];
+  for (let i = 1; i < buses.length; i++) {
+    if (buses[i] == -1) continue;
+	while ((resultSoFar + i) % buses[i] != 0) resultSoFar += lcmSoFar;
+	lcmSoFar = lcm(lcmSoFar, buses[i]);
+  }
+  
+  return resultSoFar;
+}
+
+window.onload = () => {
+  let start_time = performance.now();
+
+  let input = real_input;
+  let buslist = input[1].split(',');
+  let buses = new Array(buslist.length);
+  for (let i = 0; i < buslist.length; i++) {
+    buses[i] = buslist[i] == 'x' ? -1 : parseInt(buslist[i]);
+  }
+
+  document.body.appendChild(document.createTextNode("Part one: " + part1(input[0], buses)));
+  document.body.appendChild(document.createElement("br"));
+
+  document.body.appendChild(document.createTextNode("Part two: " + part2(buses)));
+  document.body.appendChild(document.createElement("br"));
+
+  let runtime = performance.now() - start_time;
+  document.body.appendChild(document.createTextNode("Runtime: " + runtime + "ms"));
+}
+</script>
+</body>
