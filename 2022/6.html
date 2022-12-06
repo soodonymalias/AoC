@@ -1,0 +1,24 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function solve(inputs, lookback) {
+  for (let i = lookback - 1; i < inputs.length; i++) {
+    let set = new Set();
+    for (let j = 0; j < lookback; j++)
+      set.add(inputs[i-j]);
+    if (set.size == lookback)
+      return i+1;
+  }
+  return null;
+}
+
+function part1(inputs) {
+  return solve(inputs[0], 4);
+}
+
+function part2(inputs) {
+  return solve(inputs[0], 14);
+}
+
+</script>
+</body>
