@@ -1,0 +1,52 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let dir_stack = [];
+  let dirs = new Map();
+  for (let i = 0; i < inputs.length; i++) {
+    let cmd = inputs[i].split(" ");
+    if (cmd[1] == "cd") {
+      if (cmd[2] == "..") {
+        dir_stack.pop();
+      } else {
+        let pwd = dir_stack.length == 0 ? "" : (dir_stack[dir_stack.length-1] + "/");
+        dir_stack.push(pwd + cmd[2]);
+      }
+    } else if (cmd[1] == "ls") {
+      while(i+1 < inputs.length && inputs[i+1][0] != "$") {
+        i++;
+        let entry = inputs[i].split(" ");
+        if (entry[0] == "dir")
+          continue;
+        for (let dir of dir_stack) {
+          let curr_size = dirs.has(dir) ? dirs.get(dir) : 0;
+          dirs.set(dir, curr_size + parseInt(entry[0]));
+        }
+      }
+    }
+  }
+  return dirs;
+}
+
+function part1(dirs) {
+  let result = 0;
+  for (let dir of dirs.values()) {
+    if (dir <= 100000)
+      result += dir;
+  }
+  return result;
+}
+
+function part2(dirs) {
+  let space_needed = dirs.get("/") - 40000000;
+  let result = Number.MAX_SAFE_INTEGER;
+  for (let dir of dirs.values()) {
+    if (dir >= space_needed && dir < result)
+      result = dir;
+  }
+  return result;
+}
+
+</script>
+</body>
