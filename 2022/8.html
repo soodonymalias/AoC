@@ -1,0 +1,70 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let grid = [];
+  for (let i of inputs) {
+    let row = [];
+    for (let j = 0; j < i.length; j++)
+      row.push(parseInt(i.charAt(j)));
+    grid.push(row);
+  }
+  return grid;
+}
+
+function isVisibleOneDir(grid, x, y, x_diff, y_diff) {
+  let i = x + x_diff;
+  let j = y + y_diff;
+  while (i >= 0 && j >= 0 && i < grid.length && j < grid[i].length) {
+    if (grid[i][j] >= grid[x][y])
+      return false;
+    i += x_diff;
+    j += y_diff;
+  }
+  return true;
+}
+
+function sceneScoreOneDir(grid, x, y, x_diff, y_diff) {
+  let i = x + x_diff;
+  let j = y + y_diff;
+  let score = 1;
+  while (i > 0 && j > 0 && i < grid.length-1 && j < grid[i].length-1 &&
+         grid[i][j] < grid[x][y]) {
+    i += x_diff;
+    j += y_diff;
+    score++;
+  }
+  return score;
+}
+
+function part1(grid) {
+  let visible = 0;
+  for (let i = 0; i < grid.length; i++) {
+    for (let j = 0; j < grid[i].length; j++) {
+      if (isVisibleOneDir(grid, i, j, -1, 0) ||
+          isVisibleOneDir(grid, i, j, 1, 0) ||
+          isVisibleOneDir(grid, i, j, 0, -1) ||
+          isVisibleOneDir(grid, i, j, 0, 1)) {
+        visible++;
+      }
+    }
+  }
+  return visible;
+}
+
+function part2(grid) {
+  let maxScore = 0;
+  for (let i = 1; i < grid.length - 1; i++) {
+    for (let j = 1; j < grid[i].length - 1; j++) {
+      let newScore =
+          sceneScoreOneDir(grid, i, j, -1, 0) *
+          sceneScoreOneDir(grid, i, j, 1, 0) *
+          sceneScoreOneDir(grid, i, j, 0, -1) *
+          sceneScoreOneDir(grid, i, j, 0, 1)
+      maxScore = Math.max(newScore, maxScore);
+    }
+  }
+  return maxScore;
+}
+</script>
+</body>
