@@ -1,0 +1,58 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+let offsets = new Map();
+offsets.set("U", [0, -1]);
+offsets.set("D", [0, 1]);
+offsets.set("L", [-1, 0]);
+offsets.set("R", [1, 0]);
+
+function move(inputs, knot_count) {
+  let knots = new Array();
+  for (let i = 0; i < knot_count; i++)
+    knots.push({ x: 0, y: 0 });
+ 
+  let tailVisited = new Set();
+  tailVisited.add("0,0");
+  for (let i of inputs) {
+    let order = i.split(" ");
+    let steps = parseInt(order[1]);
+    let offset = offsets.get(order[0]);
+    for (let s = 0; s < steps; s++) {
+      knots[0].x += offset[0];
+      knots[0].y += offset[1];
+      for (let k = 1; k < knot_count; k++) {
+        let distX = Math.abs(knots[k].x-knots[k-1].x);
+        let distY = Math.abs(knots[k].y-knots[k-1].y);
+        if (distX <= 1 && distY <= 1)
+          continue;
+        if (distX > 2 || distY > 2) {
+          console.log("TOO FAR " + distX + " " + distY);
+          return;
+        }
+        if (distX == 2)
+          knots[k].x = (knots[k-1].x + knots[k].x) / 2;
+        else
+          knots[k].x = knots[k-1].x;
+        
+        if (distY == 2)
+          knots[k].y = (knots[k-1].y + knots[k].y) / 2; 
+        else
+          knots[k].y = knots[k-1].y;
+      }
+      tailVisited.add(knots[knot_count-1].x.toString() + "," + knots[knot_count-1].y.toString());
+    }
+  }
+  return tailVisited.size;
+}
+
+function part1(inputs) {
+  return move(inputs, 2);
+}
+
+function part2(inputs) {
+  return move(inputs, 10);
+}
+
+</script>
+</body>
