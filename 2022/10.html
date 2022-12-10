@@ -1,0 +1,51 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script src="/helpers/print_bitmap.js"></script>
+<script>
+function part1(inputs) {
+  let v = 1;
+  let cycle = 1;
+  let result = 0;
+
+  function doCycle() {
+    if (cycle % 40 == 20)
+      result += cycle * v;
+    cycle++;
+  }
+
+  for (let i of inputs) {
+    doCycle();
+    if (i != "noop") {
+      doCycle();
+      v += parseInt(i.split(" ")[1]);
+    }
+  }
+  return result;
+}
+
+function part2(inputs) {
+  let v = 1;
+  let cycle = 1;
+  let bitmap = [];
+  let bitmap_row = [];
+
+  function doCycle() {
+    bitmap_row.push(Math.abs(((cycle - 1) % 40) - v) <= 1);
+    if (cycle % 40 == 0) {
+      bitmap.push(bitmap_row);
+      bitmap_row = [];
+    }
+    cycle++;
+  }
+
+  for (let i of inputs) {
+    doCycle();
+    if (i != "noop") {
+      doCycle();
+      v += parseInt(i.split(" ")[1]);
+    }
+  }
+  printBitmap(bitmap, 6, 40);
+}
+</script>
+</body>
