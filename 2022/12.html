@@ -1,0 +1,113 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let grid = []
+  for (let i of inputs) {
+    let row = [];
+    for (let c of i)
+      row.push(c);
+    grid.push(row);
+  }
+  return grid;
+}
+
+function findStart(grid) {
+  for (let i in grid) {
+    for (let j in grid[i]) {
+      if (grid[i][j] == "S")
+        return { i: parseInt(i), j: parseInt(j)};
+    }
+  }
+}
+
+function findEnd(grid) {
+  for (let i in grid) {
+    for (let j in grid[i]) {
+      if (grid[i][j] == "E")
+        return { i: parseInt(i), j: parseInt(j)};
+    }
+  }
+}
+
+let order = "abcdefghijklmnopqrstuvwxyz";
+function canMove(low, high) {
+  if (low == "S")
+    low = "a";
+  if (high == "E")
+    high = "z";
+  return (order.indexOf(high) - order.indexOf(low)) <= 1; 
+}
+
+let offsets = [[0,1],[0,-1],[1,0],[-1,0]];
+
+function part1(grid) {
+  let start = findStart(grid);
+  let end = findEnd(grid);
+
+  let visited = [];
+  for (let i of grid) {
+    let row = [];
+    for (let j of i)
+      row.push(-1);
+    visited.push(row);
+  }
+  visited[start.i][start.j] = 0;
+
+  let toVisit = [];
+  toVisit.push(start);
+  while (toVisit.length > 0) {
+    let curr = toVisit.shift();
+    if (curr.i == end.i && curr.j == end.j) {
+      return visited[curr.i][curr.j];
+    }
+    for (let o of offsets) {
+      let next_i = curr.i + o[0];
+      let next_j = curr.j + o[1];
+      if (next_i < 0 || next_j < 0 || next_i >= grid.length || next_j >= grid[next_i].length)
+        continue;
+      if (!canMove(grid[curr.i][curr.j], grid[next_i][next_j]))
+        continue;
+      if (visited[next_i][next_j] != -1)
+        continue;
+      visited[next_i][next_j] = visited[curr.i][curr.j] + 1;
+      toVisit.push({i: next_i, j: next_j});
+    }
+  }
+}
+
+function part2(grid) {
+  let end = findEnd(grid);
+  let visited = [];
+  for (let i of grid) {
+    let row = [];
+    for (let j of i)
+      row.push(-1);
+    visited.push(row);
+  }
+  visited[end.i][end.j] = 0;
+
+  let toVisit = [];
+  toVisit.push(end);
+  while (toVisit.length > 0) {
+    let curr = toVisit.shift();
+    if (grid[curr.i][curr.j] == 'a' || grid[curr.i][curr.j] == 'S') {
+      return visited[curr.i][curr.j];
+    }
+    for (let o of offsets) {
+      let next_i = curr.i + o[0];
+      let next_j = curr.j + o[1];
+      if (next_i < 0 || next_j < 0 || next_i >= grid.length || next_j >= grid[next_i].length)
+        continue;
+      if (!canMove(grid[next_i][next_j], grid[curr.i][curr.j]))
+        continue;
+      if (visited[next_i][next_j] != -1)
+        continue;
+      visited[next_i][next_j] = visited[curr.i][curr.j] + 1;
+      toVisit.push({i: next_i, j: next_j});
+    }
+  }
+  console.log(visited);
+}
+</script>
+</body>
