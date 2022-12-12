@@ -1,0 +1,67 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function makeMonkeys(inputs) {
+  let monkeys = [];
+  for (let i = 0; i < inputs.length; i+=7) {
+    let monkey = {};
+    monkey.items = [];
+    let item_split = inputs[i+1].split("items: ")[1].split(", ");
+    for (let item of item_split)
+      monkey.items.push(parseInt(item));
+    monkey.operation = inputs[i+2].split("new = ")[1];
+    monkey.div = parseInt(inputs[i+3].split(" by ")[1]);
+    monkey.ifTrue = parseInt(inputs[i+4].split("to monkey ")[1]);
+    monkey.ifFalse = parseInt(inputs[i+5].split("to monkey ")[1]);
+    monkey.inspectedCount = 0;
+    monkeys.push(monkey);
+  }
+  return monkeys;
+}
+
+function calculateDivProduct(monkeys) {
+  let divProduct = 1;
+  for (let m of monkeys)
+    divProduct *= m.div;
+  return divProduct;
+}
+
+function round(monkeys, divProduct, shouldDivide) {
+  for (let m of monkeys) {
+    for (let i of m.items) {
+      let op = m.operation.split(" ");
+      let opNum = op[2] == "old" ? i : parseInt(op[2]);
+      if (op[1] == "+")
+        i += opNum;
+      else
+        i *= opNum;
+      i %= divProduct;
+      if (shouldDivide)
+        i = Math.floor(i/3);
+      let newMonkey = (i % m.div == 0) ? m.ifTrue : m.ifFalse;
+      monkeys[newMonkey].items.push(i);
+      m.inspectedCount++;
+    }
+    m.items = [];
+  }
+}
+
+function part1(inputs) {
+  let monkeys = makeMonkeys(inputs);
+  let divProduct = calculateDivProduct(monkeys);
+  for (let i = 0; i < 20; i++)
+    round(monkeys, divProduct, true);
+  monkeys.sort((a, b) => a.inspectedCount > b.inspectedCount ? -1 : 1);
+  return monkeys[0].inspectedCount * monkeys[1].inspectedCount;
+}
+
+function part2(inputs) {
+  let monkeys = makeMonkeys(inputs);
+  let divProduct = calculateDivProduct(monkeys);
+  for (let i = 0; i < 10000; i++)
+    round(monkeys, divProduct, false);
+  monkeys.sort((a, b) => a.inspectedCount > b.inspectedCount ? -1 : 1);
+  return monkeys[0].inspectedCount * monkeys[1].inspectedCount;
+}
+</script>
+</body>
