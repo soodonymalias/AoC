@@ -1,0 +1,87 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function toScalar(x, y) {
+  return (x*1000)+y;
+}
+
+let floor;
+
+function parseRocks(inputs) {
+  floor = -1;
+  let rockPoints = new Set();
+  for (let i of inputs) {
+    let coords = i.split(" -> ");
+    let startX = parseInt(coords[0].split(",")[0]);
+    let startY = parseInt(coords[0].split(",")[1]);
+    for (let c = 1; c < coords.length; c++) {
+      let nextCoords = coords[c].split(",");
+      let nextX = parseInt(nextCoords[0]);
+      let nextY = parseInt(nextCoords[1]);
+      while (startX != nextX) {
+        rockPoints.add(toScalar(startX, startY));
+        if (startX > nextX) startX--;
+        else startX++;
+      }
+      while (startY != nextY) {
+        rockPoints.add(toScalar(startX, startY));
+        if (startY > nextY) startY--;
+        else startY++;
+      }
+      rockPoints.add(toScalar(startX, startY));
+      if (floor < startY+2)
+        floor = startY+2;
+    }
+  }
+  return rockPoints;
+}
+
+function dropSand(rocks, sand) {
+  let sandX = 500;
+  let sandY = 0;
+  while (true) {
+    if (sandY == floor-1)
+      return [sandX, sandY];
+    if (!rocks.has(toScalar(sandX, sandY+1)) && !sand.has(toScalar(sandX, sandY+1))) {
+      sandY++;
+      continue;
+    }
+    if (!rocks.has(toScalar(sandX-1, sandY+1)) && !sand.has(toScalar(sandX-1, sandY+1))) {
+      sandX--;
+      sandY++;
+      continue;
+    }
+    if (!rocks.has(toScalar(sandX+1, sandY+1)) && !sand.has(toScalar(sandX+1, sandY+1))) {
+      sandX++;
+      sandY++;
+      continue;
+    }
+    return [sandX, sandY];
+  }
+}
+
+function part1(inputs) {
+  let rocks = parseRocks(inputs);
+  let sand = new Set();
+  while (true) {
+    let grain = dropSand(rocks, sand);
+    if (grain[1] == floor-1)
+      break;
+    sand.add(toScalar(grain[0], grain[1]));
+  }
+  return sand.size;
+}
+
+function part2(inputs) {
+  let rocks = parseRocks(inputs);
+  let sand = new Set();
+  while (true) {
+    let grain = dropSand(rocks, sand);
+    sand.add(toScalar(grain[0], grain[1]));
+    if (grain[0] == 500 && grain[1] == 0)
+      break;
+  }
+  return sand.size;
+}
+</script>
+</body>
