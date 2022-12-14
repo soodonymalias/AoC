@@ -1,52 +1,27 @@
 <body>
 <script src="/helpers/runner.js"></script>
 <script>
-function parse(input) {
-  let curr = null;
-  for (let i = 0; i < input.length; i++) {
-    if (input[i] == "[") {
-      let next = { vals: [], parent: curr };
-      if (curr != null)
-        curr.vals.push(next);
-      curr = next;
-    } else if (input[i] == "]") {
-      if (curr.parent == null)
-        return curr;
-      curr = curr.parent;
-    } else if (input[i] == ",") {
-      continue;
-    } else {
-      let numEnd = i+1;
-      while (input[numEnd] != "," && input[numEnd] != "]")
-        numEnd++;
-      let num = input.substring(i, numEnd);
-      curr.vals.push(parseInt(num));
-      i = numEnd-1;
-    }
-  }
-}
-
 function inOrder(first, second) {
   let i = 0;
   while (true) {
-    if (i >= first.vals.length && i >= second.vals.length)
+    if (i >= first.length && i >= second.length)
       return undefined;
-    if (i >= first.vals.length)
+    if (i >= first.length)
       return true;
-    if (i >= second.vals.length)
+    if (i >= second.length)
       return false;
-    if (first.vals[i].vals == undefined && second.vals[i].vals == undefined) {
-      if (first.vals[i] < second.vals[i])
+    if (typeof first[i] == "number" && typeof second[i] == "number") {
+      if (first[i] < second[i])
         return true;
-      if (first.vals[i] > second.vals[i])
+      if (first[i] > second[i])
         return false;
     } else {
-      let firstNext = first.vals[i];
-      if (firstNext.vals == undefined)
-        firstNext = { vals: [firstNext] };
-      let secondNext = second.vals[i];
-      if (secondNext.vals == undefined)
-        secondNext = { vals: [secondNext] };
+      let firstNext = first[i];
+      if (typeof firstNext == "number")
+        firstNext = [firstNext];
+      let secondNext = second[i];
+      if (typeof secondNext == "number")
+        secondNext = [secondNext];
       let result = inOrder(firstNext, secondNext);
       if (result != undefined)
         return result;
@@ -58,8 +33,8 @@ function inOrder(first, second) {
 function part1(inputs) {
   let valid = 0;
   for (let i = 0; i*3 < inputs.length; i++) {
-    let first = parse(inputs[(i*3)]);
-    let second = parse(inputs[(i*3)+1]);
+    let first = JSON.parse(inputs[(i*3)]);
+    let second = JSON.parse(inputs[(i*3)+1]);
     let result = inOrder(first, second);
     if (result)
       valid += i+1;
@@ -71,10 +46,10 @@ function part2(inputs) {
   let packets = [];
   for (let i of inputs) {
     if (i.length > 0)
-      packets.push(parse(i));
+      packets.push(JSON.parse(i));
   }
-  let packet2 = parse("[[2]]");
-  let packet6 = parse("[[6]]");
+  let packet2 = JSON.parse("[[2]]");
+  let packet6 = JSON.parse("[[6]]");
   packets.push(packet2);
   packets.push(packet6);
 
