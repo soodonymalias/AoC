@@ -1,4 +1,5 @@
 async function runSingle(is_test) {
+  window.is_test = is_test;
   let start_time = performance.now();
   let path = location.pathname.split("/");
   let test_path = is_test ? "_test" : "";
