@@ -1,0 +1,178 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function getPairName(a, b) {
+  return (a.name < b.name) ? a.name + b.name : b.name + a.name;
+}
+
+function getDistance(src, dest, nodes) {
+  let toVisit = [src];
+  let visited = new Set();
+  visited.add(src.name);
+  let dist = 0;
+  while (toVisit.length > 0) {
+    dist++;
+    let newToVisit = [];
+    for (let v of toVisit) {
+      for (let n of v.neighbors) {
+        let node = nodes.get(n);
+        if (node == dest)
+          return dist+1;
+        if (visited.has(n))
+          continue;
+        newToVisit.push(node);
+        visited.add(n);
+      }
+    }
+    toVisit = newToVisit;
+  }
+  return -1;
+}
+
+let nodes = new Map();
+let startDistances = new Map();
+let distances = new Map();
+
+function parse(inputs) {
+  nodes.clear();
+  startDistances.clear();
+  distances.clear();
+  for (let i of inputs) {
+    let split = i.split(" ");
+    let name = split[1];
+    let flow = parseInt(split[4].split("=")[1].split(";")[0]);
+    let neighbors = [];
+    for (let s = 9; s < split.length; s++) {
+      neighbors.push(split[s].split(",")[0]);
+    }
+    nodes.set(name, { name: name, flow: flow, neighbors: neighbors, opened: false });
+  }
+  for (let i of nodes.values()) {
+    if (i.flow == 0 && i.name != "AA")
+      continue;
+    for (let j of nodes.values()) {
+      if (i === j || j.flow == 0) {
+        continue;
+      }
+      let distance = getDistance(i, j, nodes);
+      if (i.name == "AA")
+        startDistances.set(j.name, distance);
+      else
+        distances.set(getPairName(i, j), distance);
+    }
+  }
+  for (let i of nodes.values()) {
+    if (i.flow == 0) nodes.delete(i.name);
+  }
+}
+
+let bestReleased;
+let end;
+
+function step(current, previousTime, time, released) {
+  for (let n of nodes.values()) {
+    if (n.opened)
+      released += (n.flow * (time-previousTime));
+  }
+  if (time == end) {
+    bestReleased = Math.max(released, bestReleased);
+    return;
+  }
+  current.opened = true;
+  let didRecurse = false;
+  for (let n of nodes.values()) {
+    if (n.opened || n.flow == 0) continue;
+    didRecurse = false;
+    let distance = distances.get(getPairName(n, current));
+    step(nodes.get(n.name), time, Math.min(end, time+distance), released);
+  }
+  if (!didRecurse) {
+    for (let n of nodes.values()) {
+      if (n.opened)
+        released += (n.flow * (end-time));
+    }
+    bestReleased = Math.max(released, bestReleased);
+  }
+  current.opened = false;
+}
+
+function part1(inputs) {
+  bestReleased = 0;
+  end = 30;
+  parse(inputs);
+  for (let s of startDistances) {
+    step(nodes.get(s[0]), 0, parseInt(s[1]), 0);
+  }
+  return bestReleased;
+}
+
+function step2(myDest, myETA, eDest, eETA, time, released) {
+  for (let n of nodes.values()) {
+    if (n.opened)
+      released += n.flow;
+  }
+  if (time == end) {
+    bestReleased = Math.max(released, bestReleased);
+    return;
+  }
+  if (myETA == time)
+    myDest.opened = true;
+  if (eETA == time)
+    eDest.opened = true;
+ 
+  let didRecurse = false;
+  if (myETA == time) {
+   for (let nM of nodes.values()) {
+    if (nM.opened || nM.flow == 0 || nM == eDest) continue;
+      let distanceM = distances.get(getPairName(nM, myDest));
+      if (eETA == time) {
+        for (let nE of nodes.values()) {
+         if (nE.opened || nE.flow == 0 || nE == nM) continue;
+          let distanceE = distances.get(getPairName(nE, eDest));
+          didRecurse = true;
+          step2(nodes.get(nM.name), time+distanceM, nodes.get(nE.name), time+distanceE, time+1, released);
+        }
+      } else {
+          didRecurse = true;
+        step2(nodes.get(nM.name), time+distanceM, eDest, eETA, time+1, released);
+      }
+    }
+  } else if (eETA == time) {
+    for (let nE of nodes.values()) {
+     if (nE.opened || nE.flow == 0 || nE == myDest) continue;
+      let distanceE = distances.get(getPairName(nE, eDest));
+      didRecurse = true;
+      step2(myDest, myETA, nodes.get(nE.name), time+distanceE, time+1, released);
+    }
+  }
+
+  if (!didRecurse) {
+    let newMyDest = myDest == null || myDest.opened ? null : myDest;
+    let newMyETA = myDest == null || myDest.opened ? end+1 : myETA;
+    let newEDest = eDest == null || eDest.opened ? null : eDest;
+    let newEETA = eDest == null || eDest.opened ? end+1 : eETA;
+    step2(newMyDest, newMyETA, newEDest, newEETA, time+1, released);
+  }
+
+  if (myETA == time)
+    myDest.opened = false;
+  if (eETA == time)
+    eDest.opened = false;
+}
+
+function part2(inputs) {
+  // This took 11 minutes on the real input D:
+  bestReleased = 0;
+  end = 26;
+  parse(inputs);
+  for (let sM of startDistances) {
+    for (let sE of startDistances) {
+      if (sM == sE) continue;
+      step2(nodes.get(sM[0]), parseInt(sM[1]), nodes.get(sE[0]), parseInt(sE[1]), 0, 0);
+    }
+  }
+  return bestReleased;
+}
+
+</script>
+</body>
