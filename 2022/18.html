@@ -3,7 +3,7 @@
 <script>
 let offsets = [[0,0,-1], [0,0,1], [0,-1,0], [0,1,0], [-1,0,0], [1,0,0]];
 
-function dfs(start, cubes) {
+function dfs(start, cubes, knownInternal) {
   let toVisit = [start];
   let visited = new Set();
   visited.add(start[0] + "," + start[1] + "," + start[2]);
@@ -13,23 +13,28 @@ function dfs(start, cubes) {
       let newX = curr[0] + o[0];
       let newY = curr[1] + o[1];
       let newZ = curr[2] + o[2];
-      if (visited.has(newX + "," + newY + "," + newZ))
+      let newString = newX + "," + newY + "," + newZ;
+      if (knownInternal.has(newString))
+        break;
+      if (visited.has(newString))
         continue;
-      if (cubes.has(newX + "," + newY + "," + newZ))
+      if (cubes.has(newString))
         continue;
       if (newX >= 20 || newY >= 20 || newZ >= 20 ||
           newX < 0 || newY < 0 || newZ < 0) {
         return true;
       }
-      visited.add(newX + "," + newY + "," + newZ);
+      visited.add(newString);
       toVisit.push([newX, newY, newZ]);
     }
   }
+  knownInternal.add(...visited);
   return false;
 }
 
 function run(inputs, doDFS) {
   let cubes = new Set();
+  let knownInternal = new Set();
   for (let i of inputs)
     cubes.add(i);
 
@@ -43,7 +48,8 @@ function run(inputs, doDFS) {
       let newX = x + o[0];
       let newY = y + o[1];
       let newZ = z + o[2];
-      if (!cubes.has(newX + "," + newY + "," + newZ) && (!doDFS || dfs([newX, newY, newZ], cubes)))
+      let newString = newX + "," + newY + "," + newZ;
+      if (!cubes.has(newString) && !knownInternal.has(newString) && (!doDFS || dfs([newX, newY, newZ], cubes, knownInternal)))
         sides++;
     }
   }
