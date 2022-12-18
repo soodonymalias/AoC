@@ -1,0 +1,155 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+//function preprocessInput(inputs) {
+//  return inputs;
+//}
+let rocks = [
+[[2,0], [3,0], [4,0], [5,0]],
+[[3,0], [2,1], [3,1], [4,1], [3,2]],
+[[2,0], [3,0], [4,0], [4,1], [4,2]],
+[[2,0], [2,1], [2,2], [2,3]],
+[[2,0], [3,0], [2,1], [3,1]],
+]
+
+function flatten(point) {
+  return point[1]*7 + point[0];
+}
+
+function part1(inputs) {
+  let jets = inputs[0];
+  let jetPos = 0;
+  let filled = new Set();
+  for (let i = 0; i < 7; i++)
+    filled.add(i);
+  let highest = 0;
+
+  for (let i = 0; i < 2022; i++) {
+    let rock = structuredClone(rocks[i%rocks.length]);
+    for (let r of rock) {
+      r[1] += highest + 4;
+    }
+    while (true) {
+      let sideways = jets.charAt(jetPos) == "<" ? -1 : 1;
+      jetPos = (jetPos+1) % jets.length;
+      let newRock = [];
+      let didMove = true;
+      for (let r of rock) {
+        let newR = [r[0] + sideways, r[1]];
+        if (newR[0] < 0 || newR[0] >= 7 || filled.has(flatten(newR))) {
+          didMove = false;
+          break;
+        }
+        newRock.push(newR);
+      }
+      if (didMove)
+        rock = newRock;
+      didMove = true;
+      newRock = [];
+      for (let r of rock) {
+        let newR = [r[0], r[1] - 1];
+        if (filled.has(flatten(newR))) {
+          didMove = false;
+          break;
+        }
+        newRock.push(newR);
+      }
+      if (didMove)
+        rock = newRock;
+      else
+        break;
+    }
+    for (let r of rock) {
+      highest = Math.max(highest, r[1]);
+      filled.add(flatten(r));
+    }
+  }
+  return highest;
+}
+
+function makeState(rNum, jetPos, filled, highest) {
+  let state = rNum + "_" + jetPos;
+  for (let i = 0; i < 7; i++) {
+    let j = 0;
+    for (; j < 250 && j <= highest; j++) {
+      if (filled.has(flatten([i, highest-j]))) {
+        break;
+      }
+    }
+    state += "_" + j;
+  }
+  return state;
+} 
+
+function part2(inputs) {
+  let jets = inputs[0];
+  let jetPos = 0;
+  let filled = new Set();
+  for (let i = 0; i < 7; i++)
+    filled.add(i);
+  let highest = 0;
+
+  let states = new Map();
+  let i_to_highest = [];
+
+  let i = 0;
+  while (true) {
+    let rNum = i%rocks.length;
+
+    let state = makeState(rNum, jetPos, filled, highest);
+    if (states.has(state)) {
+      let previous_state = states.get(state);
+      let cycle = i - previous_state.i;
+      let cycles_to_end = Math.trunc((1000000000000 - i - 1) / cycle);
+      let offset = (1000000000000 - i - 1) % cycle;
+      return highest + ((highest - previous_state.highest) * cycles_to_end) + (i_to_highest[i - cycle + offset] - previous_state.highest);
+    }
+    states.set(state, { highest: highest, i: i });
+
+    let rock = structuredClone(rocks[rNum]);
+    for (let r of rock) {
+      r[1] += highest + 4;
+    }
+    
+    while (true) {
+      let sideways = jets.charAt(jetPos) == "<" ? -1 : 1;
+      jetPos = (jetPos+1) % jets.length;
+      let newRock = [];
+      let didMove = true;
+      for (let r of rock) {
+        let newR = [r[0] + sideways, r[1]];
+        if (newR[0] < 0 || newR[0] >= 7 || filled.has(flatten(newR))) {
+          didMove = false;
+          break;
+        }
+        newRock.push(newR);
+      }
+      if (didMove)
+        rock = newRock;
+      didMove = true;
+      newRock = [];
+      for (let r of rock) {
+        let newR = [r[0], r[1] - 1];
+        if (filled.has(flatten(newR))) {
+          didMove = false;
+          break;
+        }
+        newRock.push(newR);
+      }
+      if (didMove)
+        rock = newRock;
+      else
+        break;
+    }
+    for (let r of rock) {
+      highest = Math.max(highest, r[1]);
+      filled.add(flatten(r));
+    }
+    i_to_highest.push(highest);
+    i++;
+  }
+  return highest;
+}
+
+</script>
+</body>
