@@ -1,0 +1,61 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+let offsets = [[0,0,-1], [0,0,1], [0,-1,0], [0,1,0], [-1,0,0], [1,0,0]];
+
+function dfs(start, cubes) {
+  let toVisit = [start];
+  let visited = new Set();
+  visited.add(start[0] + "," + start[1] + "," + start[2]);
+  while (toVisit.length > 0) {
+    let curr = toVisit.pop();
+    for (let o of offsets) {
+      let newX = curr[0] + o[0];
+      let newY = curr[1] + o[1];
+      let newZ = curr[2] + o[2];
+      if (visited.has(newX + "," + newY + "," + newZ))
+        continue;
+      if (cubes.has(newX + "," + newY + "," + newZ))
+        continue;
+      if (newX >= 20 || newY >= 20 || newZ >= 20 ||
+          newX < 0 || newY < 0 || newZ < 0) {
+        return true;
+      }
+      visited.add(newX + "," + newY + "," + newZ);
+      toVisit.push([newX, newY, newZ]);
+    }
+  }
+  return false;
+}
+
+function run(inputs, doDFS) {
+  let cubes = new Set();
+  for (let i of inputs)
+    cubes.add(i);
+
+  let sides = 0;
+  for (let i of inputs) {
+    let split = i.split(",");
+    let x = parseInt(split[0]);
+    let y = parseInt(split[1]);
+    let z = parseInt(split[2]);
+    for (let o of offsets) {
+      let newX = x + o[0];
+      let newY = y + o[1];
+      let newZ = z + o[2];
+      if (!cubes.has(newX + "," + newY + "," + newZ) && (!doDFS || dfs([newX, newY, newZ], cubes)))
+        sides++;
+    }
+  }
+  return sides;
+}
+
+function part1(inputs) {
+  return run(inputs, false);
+}
+
+function part2(inputs) {
+  return run(inputs, true);
+}
+</script>
+</body>
