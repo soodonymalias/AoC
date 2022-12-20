@@ -1,0 +1,59 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function doMix(toDo, mixed) {
+  for (let d of toDo) {
+    let toMove = d.value;
+    toMove %= (toDo.length - 1);
+    if (toMove < 0) {
+      toMove = (toDo.length - 1 + toMove);
+    }
+    for (let i = 0; i < toMove; i++) {
+      let swapIndex = (d.current + 1) % toDo.length;
+      let toSwap = mixed.get(swapIndex);
+      toSwap.current = d.current;
+      d.current = swapIndex;
+      mixed.set(toSwap.current, toSwap);
+      mixed.set(d.current, d);
+    }
+  }
+}
+
+function mix(data, mixCount) {
+  let toDo = []
+  let mixed = new Map();
+  for (let i = 0; i < data.length; i++) {
+    let dObj = { current: i, value: data[i] };
+    mixed.set(i, dObj);
+    toDo.push(dObj);
+  }
+  for (let i = 0; i < mixCount; i++)
+    doMix(toDo, mixed);
+
+  let zero_index;
+  for (let d of toDo) {
+    if (d.value == 0) {
+      zero_index = (d.current) % toDo.length;
+      break;
+    }
+  }
+  return mixed.get((zero_index + 1000) % data.length).value +
+      mixed.get((zero_index + 2000) % data.length).value +
+      mixed.get((zero_index + 3000) % data.length).value;
+}
+
+function part1(inputs) {
+  let data = []
+  for (let i of inputs)
+    data.push(parseInt(i));
+  return mix(data, 1);
+}
+
+function part2(inputs) {
+  let data = []
+  for (let i of inputs)
+    data.push(parseInt(i) * 811589153);
+  return mix(data, 10);
+}
+</script>
+</body>
