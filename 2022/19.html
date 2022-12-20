@@ -1,0 +1,146 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function process(blueprint) {
+  let bp = {};
+  let split = blueprint.split(" robot costs ");
+  bp.ore_cost = parseInt(split[1].split(" ore")[0]);
+  bp.clay_cost = parseInt(split[2].split(" ore")[0]);
+  let obsid_split = split[3].split(" ");
+  bp.obsid_ore_cost = parseInt(obsid_split[0]);
+  bp.obsid_clay_cost = parseInt(obsid_split[3]);
+  let geode_spilt = split[4].split(" ");
+  bp.geode_ore_cost = parseInt(geode_spilt[0]);
+  bp.geode_obsid_cost = parseInt(geode_spilt[3]);
+
+  let state = {
+    ore_robots : 1,
+    clay_robots : 0,
+    obsid_robots : 0,
+    geode_robots : 0,
+    ore : 0,
+    clay : 0,
+    obsid : 0,
+    geodes : 0
+  };
+
+  let states = new Map();
+  states.set("", state);
+  for (let i = 0; i < 24; i++) {
+    let newStates = [];
+    for (let s of states.values()) {
+      let orR = s.ore_robots;
+      let cR = s.clay_robots;
+      let obR = s.obsid_robots;
+      let gR = s.geode_robots;
+
+      if (s.ore >= bp.geode_ore_cost && s.obsid >= bp.geode_obsid_cost) {
+        let nS = structuredClone(s);
+        nS.geode_robots++;
+        nS.ore -= bp.geode_ore_cost;
+        nS.obsid -= bp.geode_obsid_cost;
+        nS.ore += orR;
+        nS.clay += cR;
+        nS.obsid += obR;
+        nS.geodes += gR;
+        newStates.push(nS);
+      }
+      let turns_to_geode = s.obsid_robots == 0 ? 100 : Math.ceil((bp.geode_obsid_cost - s.obsid) / s.obsid_robots);
+      let turns_to_obsid = s.clay_robots == 0 ? 100 : Math.ceil((bp.obsid_clay_cost - s.clay) / s.clay_robots);
+      if (s.ore >= bp.obsid_ore_cost && s.clay >= bp.obsid_clay_cost && ((s.ore + (turns_to_geode * s.ore_robots)) >= (bp.geode_ore_cost + bp.obsid_ore_cost))) {
+        let nS = structuredClone(s);
+        nS.obsid_robots++;
+        nS.ore -= bp.obsid_ore_cost;
+        nS.clay -= bp.obsid_clay_cost;
+        nS.ore += orR;
+        nS.clay += cR;
+        nS.obsid += obR;
+        nS.geodes += gR;
+        newStates.push(nS);
+      }
+      if (s.ore >= bp.ore_cost &&
+          ((s.ore + (turns_to_obsid * s.ore_robots)) >= (bp.obsid_ore_cost + bp.ore_cost)) &&
+          ((s.ore + (turns_to_geode * s.ore_robots)) >= (bp.geode_ore_cost + bp.ore_cost))) {
+        let nS = structuredClone(s);
+        nS.ore_robots++;
+        nS.ore -= bp.ore_cost;
+        nS.ore += orR;
+        nS.clay += cR;
+        nS.obsid += obR;
+        nS.geodes += gR;
+        newStates.push(nS);
+      }
+      if (s.ore >= bp.clay_cost && 
+          ((s.ore + (turns_to_obsid * s.ore_robots)) >= (bp.obsid_ore_cost + bp.clay_cost))) {
+        let nS = structuredClone(s);
+        nS.clay_robots++;
+        nS.ore -= bp.clay_cost;
+        nS.ore += orR;
+        nS.clay += cR;
+        nS.obsid += obR;
+        nS.geodes += gR;
+        newStates.push(nS);
+      }
+      
+      s.ore += orR;
+      s.clay += cR;
+      s.obsid += obR;
+      s.geodes += gR;
+      newStates.push(s);
+      //console.log((i+1) + " " + s.ore + " " + s.clay + " " + s.obsid + " " + s.geodes);
+    }
+    states = new Map();
+    for (let s of newStates) {
+      let sString = s.ore_robots + "_" + s.clay_robots + "_" + s.obsid_robots + "_" + s.geode_robots;
+      if (!states.has(sString)) {
+        states.set(sString, s);
+        continue;
+      }
+      let sOld = states.get(sString);
+      if (sOld.geode > s.geode) {
+        continue;
+      } else if (sOld.geode < s.geode) {
+        states.set(sString, s);
+        continue;
+      }
+      if (sOld.obsid > s.obsid) {
+        continue;
+      } else if (sOld.obsid < s.obsid) {
+        states.set(sString, s);
+        continue;
+      }
+      if (sOld.clay > s.clay) {
+        continue;
+      } else if (sOld.clay < s.clay) {
+        states.set(sString, s);
+        continue;
+      }
+      if (sOld.ore < s.ore)
+        states.set(sString, s);
+    }
+    console.log((i+1) + " " + states.size);
+  }
+  let maxG = 0;
+  for (let s of states)
+    maxG = Math.max(maxG, s[1].geodes); 
+  return maxG;
+}
+
+function part1(inputs) {
+  let result = 0;
+  return process(inputs[1]);
+  /*for (let i = 0; i < inputs.length; i++) {
+    let p = process(inputs[i]);
+    console.log((i+1) + " " + p);
+    result += (process(inputs[i]) * (i+1));
+  }*/
+  // Guessed:
+  // 809
+  return result;
+}
+
+function part2(inputs) {
+}
+
+</script>
+</body>
