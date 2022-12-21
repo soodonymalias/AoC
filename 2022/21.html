@@ -1,0 +1,120 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function solve(monkeys, toDo) {
+  while (toDo.length > 0) {
+    let m = toDo.shift();
+    for (let bName of m.blocking) {
+      let b = monkeys.get(bName);
+      if (m.name == b.dep1) {
+        b.dep1 = m.value;
+      } else if (m.name == b.dep2) {
+        b.dep2 = m.value;
+      }
+      if (Number.isInteger(b.dep1) && Number.isInteger(b.dep2)) {
+        b.value = eval(b.dep1 + b.op + b.dep2);
+        toDo.push(b);
+      }
+    }
+  }
+}
+
+function reverse(monkeys) {
+  let root = monkeys.get("root");
+  let goal;
+  let curr;
+  if (Number.isInteger(root.dep1)) {
+    goal = root.dep1;
+    curr = monkeys.get(root.dep2);
+  } else {
+    goal = root.dep2;
+    curr = monkeys.get(root.dep1);
+  }
+  while (curr.name != "humn") {
+    let known;
+    let next;
+    if (Number.isInteger(curr.dep1)) {
+      known = curr.dep1;
+      next = monkeys.get(curr.dep2);
+    } else {
+      known = curr.dep2;
+      next = monkeys.get(curr.dep1);
+    }
+    let next_goal
+    if (curr.op == "+") {
+      next_goal = goal - known;
+    } else if (curr.op == "*") {
+      next_goal = goal / known;
+    } else if (curr.op == "-") {
+      if (next.name == curr.dep1)
+        next_goal = goal + known;
+      else
+        next_goal = known - goal;
+    } else if (curr.op == "/") {
+      if (next.name == curr.dep1)
+        next_goal = goal * known;
+      else
+        next_goal = known / goal;
+    }
+    goal = next_goal;
+    curr = next;
+  }
+  return goal;
+}
+
+function part1(inputs) {
+  let monkeys = new Map();
+  for (let i of inputs) {
+    let split = i.split(":");
+    let name = split[0];
+    let space_split = split[1].split(" ");
+    if (space_split.length == 2) {
+      monkeys.set(name, { name: name, dep1: "", dep2: "", value: parseInt(space_split[1]), blocking: [] });
+      continue;
+    }
+    monkeys.set(name, { name: name, dep1 : space_split[1], dep2: space_split[3], op: space_split[2], blocking: [] , value: null }); 
+  }
+  let toDo = [];
+  for (let m of monkeys.values()) {
+    if (m.dep1 != "") {
+      monkeys.get(m.dep1).blocking.push(m.name);
+    }
+    if (m.dep2 != "") {
+      monkeys.get(m.dep2).blocking.push(m.name);
+    }
+    if (m.value != null)
+      toDo.push(m);
+  }
+  solve(monkeys, toDo);
+  return monkeys.get("root").value;
+}
+
+function part2(inputs) {
+  let monkeys = new Map();
+  for (let i of inputs) {
+    let split = i.split(":");
+    let name = split[0];
+    let space_split = split[1].split(" ");
+    if (space_split.length == 2) {
+      monkeys.set(name, { name: name, dep1: "", dep2: "", value: parseInt(space_split[1]), blocking: [] });
+      continue;
+    }
+    monkeys.set(name, { name: name, dep1 : space_split[1], dep2: space_split[3], op: space_split[2], blocking: [] , value: null }); 
+  }
+  let toDo = [];
+  for (let m of monkeys.values()) {
+    if (m.dep1 != "") {
+      monkeys.get(m.dep1).blocking.push(m.name);
+    }
+    if (m.dep2 != "") {
+      monkeys.get(m.dep2).blocking.push(m.name);
+    }
+    if (m.value != null && m.name != "humn")
+      toDo.push(m);
+  }
+  solve(monkeys, toDo);
+  return reverse(monkeys);
+}
+
+</script>
+</body>
