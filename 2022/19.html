@@ -1,7 +1,7 @@
 <body>
 <script src="/helpers/runner.js"></script>
 <script>
-function process(blueprint) {
+function process(blueprint, steps) {
   let bp = {};
   let split = blueprint.split(" robot costs ");
   bp.ore_cost = parseInt(split[1].split(" ore")[0]);
@@ -26,7 +26,7 @@ function process(blueprint) {
 
   let states = new Map();
   states.set("", state);
-  for (let i = 0; i < 24; i++) {
+  for (let i = 0; i < steps; i++) {
     let newStates = [];
     for (let s of states.values()) {
       let orR = s.ore_robots;
@@ -47,7 +47,7 @@ function process(blueprint) {
       }
       let turns_to_geode = s.obsid_robots == 0 ? 100 : Math.ceil((bp.geode_obsid_cost - s.obsid) / s.obsid_robots);
       let turns_to_obsid = s.clay_robots == 0 ? 100 : Math.ceil((bp.obsid_clay_cost - s.clay) / s.clay_robots);
-      if (s.ore >= bp.obsid_ore_cost && s.clay >= bp.obsid_clay_cost && ((s.ore + (turns_to_geode * s.ore_robots)) >= (bp.geode_ore_cost + bp.obsid_ore_cost))) {
+      if (s.ore >= bp.obsid_ore_cost && s.clay >= bp.obsid_clay_cost) {
         let nS = structuredClone(s);
         nS.obsid_robots++;
         nS.ore -= bp.obsid_ore_cost;
@@ -58,9 +58,7 @@ function process(blueprint) {
         nS.geodes += gR;
         newStates.push(nS);
       }
-      if (s.ore >= bp.ore_cost &&
-          ((s.ore + (turns_to_obsid * s.ore_robots)) >= (bp.obsid_ore_cost + bp.ore_cost)) &&
-          ((s.ore + (turns_to_geode * s.ore_robots)) >= (bp.geode_ore_cost + bp.ore_cost))) {
+      if (s.ore >= bp.ore_cost) {
         let nS = structuredClone(s);
         nS.ore_robots++;
         nS.ore -= bp.ore_cost;
@@ -70,8 +68,7 @@ function process(blueprint) {
         nS.geodes += gR;
         newStates.push(nS);
       }
-      if (s.ore >= bp.clay_cost && 
-          ((s.ore + (turns_to_obsid * s.ore_robots)) >= (bp.obsid_ore_cost + bp.clay_cost))) {
+      if (s.ore >= bp.clay_cost) {
         let nS = structuredClone(s);
         nS.clay_robots++;
         nS.ore -= bp.clay_cost;
@@ -91,13 +88,14 @@ function process(blueprint) {
     }
     states = new Map();
     for (let s of newStates) {
-      let sString = s.ore_robots + "_" + s.clay_robots + "_" + s.obsid_robots + "_" + s.geode_robots;
+      let sString = s.ore_robots + "_" + s.clay_robots + "_" + s.obsid_robots + "_" + s.geode_robots + "_" + s.geodes + "_" + s.obsid + "_" + s.clay;// + "_" + s.ore;
       if (!states.has(sString)) {
         states.set(sString, s);
         continue;
       }
       let sOld = states.get(sString);
-      if (sOld.geode > s.geode) {
+      //console.log(sOld, s);
+      /*if (sOld.geode > s.geode) {
         continue;
       } else if (sOld.geode < s.geode) {
         states.set(sString, s);
@@ -108,17 +106,18 @@ function process(blueprint) {
       } else if (sOld.obsid < s.obsid) {
         states.set(sString, s);
         continue;
-      }
-      if (sOld.clay > s.clay) {
+      }*/
+      /*if (sOld.clay > s.clay) {
         continue;
       } else if (sOld.clay < s.clay) {
         states.set(sString, s);
         continue;
-      }
+      }*/
       if (sOld.ore < s.ore)
+      //if (sOld.clay + sOld.ore < s.clay + s.ore)
         states.set(sString, s);
     }
-    console.log((i+1) + " " + states.size);
+    //console.log((i+1) + " " + states.size);
   }
   let maxG = 0;
   for (let s of states)
@@ -127,19 +126,24 @@ function process(blueprint) {
 }
 
 function part1(inputs) {
-  let result = 0;
-  return process(inputs[1]);
-  /*for (let i = 0; i < inputs.length; i++) {
-    let p = process(inputs[i]);
+  /*let result = 0;
+  //return process(inputs[1]);
+  for (let i = 0; i < inputs.length; i++) {
+    let p = process(inputs[i], 24);
     console.log((i+1) + " " + p);
     result += (process(inputs[i]) * (i+1));
-  }*/
-  // Guessed:
-  // 809
-  return result;
+  }
+  return result;*/
 }
 
 function part2(inputs) {
+  let result = 1;
+  for (let i = 0; i < 3; i++) {
+    let p = process(inputs[i], 32);
+    console.log((i+1) + " " + p);
+    result *= (process(inputs[i]) * (i+1));
+  }
+  return result;
 }
 
 </script>
