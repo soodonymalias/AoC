@@ -1,0 +1,141 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+
+function parse(inputs)
+{
+  let elves = new Set();
+  for (let i = 0; i < inputs.length; i++) {
+    for (let j = 0; j < inputs[i].length; j++) {
+      if (inputs[i].charAt(j) == "#") {
+        elves.add(i + "," + j);
+      }
+    }
+  }
+  return elves;
+}
+
+function oneRound(elves, roundNumber)
+{
+  let directions = [
+    {moveDirection:[-1, 0], checkDirections: [[-1,-1], [-1, 0], [-1, 1]]},
+    {moveDirection:[ 1, 0], checkDirections: [[ 1,-1], [ 1, 0], [ 1, 1]]},
+    {moveDirection:[ 0,-1], checkDirections: [[-1,-1], [ 0,-1], [ 1,-1]]},
+    {moveDirection:[ 0, 1], checkDirections: [[-1, 1], [ 0, 1], [ 1, 1]]}
+    ];
+
+  let newElves = new Set();
+  let moveElves = new Map();
+  for (let e of elves) {
+    let split = e.split(",");
+    let eI = parseInt(split[0]);
+    let eJ = parseInt(split[1]);
+    let hasAnyNeighbor = false;
+    let firstNeighborlessDir = -1;
+    for (let i = 0; i < 4; i++) { //each move direction
+      let dirToCheck = (roundNumber + i) % 4;
+      let hasNeighbors = false;
+
+      for (let d of directions[dirToCheck].checkDirections) {
+        let neighbor = (eI + d[0]) + "," + (eJ + d[1]);
+        if (elves.has(neighbor))
+        {
+          hasNeighbors = true;
+        }
+      }
+      if(hasNeighbors == true)
+        hasAnyNeighbor = true;
+      else if (firstNeighborlessDir == -1)
+        firstNeighborlessDir = dirToCheck;
+    } //end for each move direction
+    if (!hasAnyNeighbor || firstNeighborlessDir == -1)
+    {
+      newElves.add(e);
+    }
+    else
+    {
+      let moveDir = directions[firstNeighborlessDir].moveDirection;
+      let moveDest = (eI+moveDir[0])+","+(eJ+moveDir[1]);
+      let sourceArray;
+      if (moveElves.has(moveDest))
+        sourceArray = moveElves.get(moveDest);
+      else
+        sourceArray = [];
+      sourceArray.push(e);
+      moveElves.set(moveDest, sourceArray);
+    }
+  } //end for each elf
+  let didMove = false;
+  for (let moveDest of moveElves)
+  {
+    if (moveDest[1].length == 1)
+    {
+      newElves.add(moveDest[0]);
+      didMove = true;
+    }
+    else
+    {
+      for (let m of moveDest[1])
+        newElves.add(m);
+    }
+  }
+  return { newElves: newElves, didMove: didMove};
+}
+
+//12 x 11
+//minI = 0; minJ = 0;
+//maxI = 11; maxJ = 10;
+function rectangleSize(elves)
+{
+  let minI = Number.MAX_SAFE_INTEGER;
+  let minJ = Number.MAX_SAFE_INTEGER;
+  let maxI = Number.MIN_SAFE_INTEGER;
+  let maxJ = Number.MIN_SAFE_INTEGER;
+  for (let e of elves)
+  {
+    let split = e.split(",");
+    let eI = parseInt(split[0]);
+    let eJ = parseInt(split[1]);
+    if (eI < minI)
+      minI = eI;
+    if (eJ < minJ)
+      minJ = eJ;
+    if (eI > maxI)
+      maxI = eI;
+    if (eJ > maxJ)
+      maxJ = eJ;
+  }
+  let area = (maxI-minI+1)*(maxJ-minJ+1) - elves.size;
+  return area;
+}
+
+function part1(inputs)
+{
+  let elves  = parse(inputs);
+  //loop 10 times
+  for (let i=0; i < 10; i++)
+  {
+    let result = oneRound(elves, i);
+    elves = result.newElves;
+  }
+  console.log(elves);
+  return rectangleSize(elves);
+}
+
+function part2(inputs)
+{
+  let elves = parse(inputs);
+  let i = 0;
+  while (true) {
+    let result = oneRound(elves, i);
+    elves = result.newElves;
+    if (!result.didMove) {
+      console.log(elves);
+      return i+1;
+    }
+    i++;
+  }
+  // 1011 (low)
+}
+</script>
+</body>
