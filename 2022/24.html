@@ -1,0 +1,171 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function parse(inputs) {
+  let grid = [];
+  for (let i = 0; i < inputs.length; i++) {
+    if (inputs[i].length == 0)
+      break;
+    let row = []
+    for (let j = 0; j < inputs[i].length; j++) {
+      let blizzards = [];
+      if (inputs[i][j] != "." && inputs[i][j] != "#")
+        blizzards.push(inputs[i][j]);
+      row.push({ isEnd: (i == (inputs.length-2) && inputs[i][j] == "."), isStart: (i == 0 && inputs[i][j] == "."), hasElf: (i == 0 && inputs[i][j] == "."), blizzards: blizzards });
+    }
+    grid.push(row);
+  }
+  return grid;
+}
+
+let blizzMoves = new Map();
+blizzMoves.set("<", [0, -1]);
+blizzMoves.set(">", [0, 1]);
+blizzMoves.set("^", [-1, 0]);
+blizzMoves.set("v", [1, 0]);
+
+function moveBlizzards(grid, x, y) {
+  let newGrid = [];
+  for (let i = 0; i < x; i++) {
+    let row = [];
+    for (let j = 0; j < y; j++)
+      row.push({ isEnd: grid[i][j].isEnd, isStart: grid[i][j].isStart, hasElf: false, blizzards: [] });
+    newGrid.push(row);
+  }
+
+  for (let i = 0; i < x; i++) {
+    for (let j = 0; j < y; j++) {
+      for (let b of grid[i][j].blizzards) {
+        let move = blizzMoves.get(b);
+        let newI = i + move[0];
+        if (newI == 0)
+          newI = x - 2;
+        else if (newI == x - 1)
+          newI = 1;
+        let newJ = j + move[1];
+        if (newJ == 0)
+          newJ = y - 2;
+        else if (newJ == y - 1)
+          newJ = 1;
+        newGrid[newI][newJ].blizzards.push(b);
+      }
+    }
+  }
+  return newGrid;
+}
+
+let offsets = [[0, 1], [0, -1], [1, 0], [-1, 0], [0, 0]];
+function moveElves(oldGrid, newGrid, x, y) {
+  for (let i = 0; i < x; i++) {
+    for (let j = 0; j < y; j++) {
+      for (let o of offsets) {
+        if (!oldGrid[i][j].hasElf)
+          continue;
+        let newI = i + o[0];
+        let newJ = j + o[1];
+        if (newI < 0 || newJ < 0 || newI >= x || newJ >= y)
+          continue;
+        if (newJ == 0 || newJ == y - 1)
+          continue;
+        if (newI == 0 && !oldGrid[newI][newJ].isStart)
+          continue;
+        if (newI == x - 1 && !oldGrid[newI][newJ].isEnd)
+          continue;
+        if (newGrid[newI][newJ].blizzards.length != 0)
+          continue;
+        //console.log(newI + " " + newJ);
+        newGrid[newI][newJ].hasElf = true;
+      }
+    }
+  }
+  return newGrid;
+}
+
+function part1(inputs) {
+  let grid = parse(inputs);
+  let x = grid.length;
+  let y = grid[0].length;
+  
+  let startI;
+  let startJ;
+  let endI;
+  let endJ;
+  for (let i = 0; i < x; i++) {
+    for (let j = 0; j < y; j++) {
+      if (grid[i][j].isStart) {
+        startI = i;
+        startJ = j;
+      } else if (grid[i][j].isEnd) {
+        endI = i;
+        endJ = j;
+      }
+    }
+  }
+
+  let i = 0;
+  while (true) {
+    i++;
+    let blizzards = moveBlizzards(grid, x, y);
+    grid = moveElves(grid, blizzards, x, y);
+    if (grid[endI][endJ].hasElf)
+      break;
+  }
+  return i;
+}
+
+function part2(inputs) {
+  let grid = parse(inputs);
+  let x = grid.length;
+  let y = grid[0].length;
+  
+  let startI;
+  let startJ;
+  let endI;
+  let endJ;
+  for (let i = 0; i < x; i++) {
+    for (let j = 0; j < y; j++) {
+      if (grid[i][j].isStart) {
+        startI = i;
+        startJ = j;
+      } else if (grid[i][j].isEnd) {
+        endI = i;
+        endJ = j;
+      }
+    }
+  }
+
+  let i = 0;
+  while (true) {
+    i++;
+    let blizzards = moveBlizzards(grid, x, y);
+    grid = moveElves(grid, blizzards, x, y);
+    if (grid[endI][endJ].hasElf)
+      break;
+  }
+  for (let i = 0; i < x; i++) {
+    for (let j = 0; j < y; j++)
+      grid[i][j].hasElf = grid[i][j].isEnd;
+  }
+  while (true) {
+    i++;
+    let blizzards = moveBlizzards(grid, x, y);
+    grid = moveElves(grid, blizzards, x, y);
+    if (grid[startI][startJ].hasElf)
+      break;
+  }
+  for (let i = 0; i < x; i++) {
+    for (let j = 0; j < y; j++)
+      grid[i][j].hasElf = grid[i][j].isStart;
+  }
+  while (true) {
+    i++;
+    let blizzards = moveBlizzards(grid, x, y);
+    grid = moveElves(grid, blizzards, x, y);
+    if (grid[endI][endJ].hasElf)
+      break;
+  }
+  return i;
+}
+
+</script>
+</body>
