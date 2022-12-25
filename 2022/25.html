@@ -1,0 +1,46 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+
+let s_to_n = new Map();
+s_to_n.set("2", 2);
+s_to_n.set("1", 1);
+s_to_n.set("0", 0);
+s_to_n.set("-", -1);
+s_to_n.set("=", -2);
+
+let n_to_s = new Map();
+n_to_s.set(2, "2");
+n_to_s.set(1, "1");
+n_to_s.set(0, "0");
+n_to_s.set(4, "-");
+n_to_s.set(3, "=");
+
+function part1(inputs) {
+  let sum = 0;
+  for (let i of inputs) {
+    let curr = 0;
+    for (let c of i) {
+      curr *= 5;
+      curr += s_to_n.get(c);
+    }
+    sum += curr;
+  }
+  
+  let result = "";
+  while (sum > 0) {
+    let next_digit = sum % 5;
+    result = n_to_s.get(next_digit) + result;
+    sum /= 5;
+    if (next_digit > 2)
+      sum = Math.ceil(sum);
+    else
+      sum = Math.floor(sum);
+  }
+  return result;
+}
+
+function part2(inputs) {
+}
+</script>
+</body>
