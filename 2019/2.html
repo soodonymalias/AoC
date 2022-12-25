@@ -1,0 +1,58 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+//function preprocessInput(inputs) {
+//  return inputs;
+//}
+
+function part1(inputs) {
+  let code = [];
+  let split = inputs[0].split(",");
+  for (let s of split)
+    code.push(parseInt(s));
+  code[1] = 12;
+  code[2] = 2;
+
+  let step = 0;
+  while (true) {
+    let cmd = code[step];
+    if (cmd == 99)
+      break;
+    let result;
+    if (cmd == 1)
+      result = code[code[step+1]] + code[code[step+2]];
+    else if (cmd == 2)
+      result = code[code[step+1]] * code[code[step+2]];
+    code[code[step+3]] = result;
+    step += 4;
+  }
+  return code[0];
+}
+
+function part2(inputs) {
+  let code = [];
+  let split = inputs[0].split(",");
+  for (let s of split)
+    code.push(parseInt(s));
+  // Found inductively. Answer is (100*48) + 47
+  code[1] = 48;
+  code[2] = 47;
+
+  let step = 0;
+  while (true) {
+    let cmd = code[step];
+    if (cmd == 99)
+      break;
+    let result;
+    if (cmd == 1)
+      result = code[code[step+1]] + code[code[step+2]];
+    else if (cmd == 2)
+      result = code[code[step+1]] * code[code[step+2]];
+    code[code[step+3]] = result;
+    step += 4;
+  }
+  return code[0];
+}
+
+</script>
+</body>

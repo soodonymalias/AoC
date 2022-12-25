@@ -6,6 +6,8 @@ async function runSingle(is_test) {
   let inputLocation = "inputs/" + path[path.length-1].split(".")[0] + test_path + ".txt";
   let inputResponse = await fetch(inputLocation, { cache: 'no-cache' });
   let inputs = (await inputResponse.text()).split(/\r?\n/);
+  while (inputs[inputs.length-1].length == 0)
+    inputs.pop();
   if (window.preprocessInput)
     inputs = preprocessInput(inputs);
 

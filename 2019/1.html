@@ -1,0 +1,30 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+//function preprocessInput(inputs) {
+//  return inputs;
+//}
+
+function part1(inputs) {
+  let sum = 0;
+  for (let i of inputs) {
+    if (i.length == 0) continue;
+    sum += (Math.trunc(parseInt(i) / 3) - 2);
+  }
+  return sum;
+}
+
+function part2(inputs) {
+  let sum = 0;
+  for (let i of inputs) {
+    let fuel = (Math.trunc(parseInt(i) / 3) - 2);
+    while (fuel > 0) {
+      sum += fuel;
+      fuel = Math.trunc(fuel / 3) - 2;
+    }
+  }
+  return sum;
+}
+
+</script>
+</body>

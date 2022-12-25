@@ -1,0 +1,84 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+let offsets = new Map();
+offsets.set("U", [-1, 0]);
+offsets.set("D", [1, 0]);
+offsets.set("L", [0, -1]);
+offsets.set("R", [0, 1]);
+
+function part1(inputs) {
+  let positions = new Set();
+
+  let first = inputs[0].split(",");
+  let currentI = 0;
+  let currentJ = 0;
+  for (let f of first) {
+    let o = offsets.get(f[0]);
+    let steps = parseInt(f.substring(1));
+    for (let s = 0; s < steps; s++) {
+      currentI += o[0];
+      currentJ += o[1];
+      positions.add(currentI + "," + currentJ);
+    }
+  }
+
+  let closestMatch = Number.MAX_SAFE_INTEGER;
+  let second = inputs[1].split(",");
+  currentI = 0;
+  currentJ = 0;
+  for (let f of second) {
+    let o = offsets.get(f[0]);
+    let steps = parseInt(f.substring(1));
+    for (let s = 0; s < steps; s++) {
+      currentI += o[0];
+      currentJ += o[1];
+      if (positions.has(currentI + "," + currentJ))
+        closestMatch = Math.min(closestMatch, Math.abs(currentI) + Math.abs(currentJ));
+    }
+  }
+  return closestMatch;
+}
+
+function part2(inputs) {
+  let positions = new Map();
+
+  let first = inputs[0].split(",");
+  let currentI = 0;
+  let currentJ = 0;
+  let totalSteps = 0;
+  for (let f of first) {
+    let o = offsets.get(f[0]);
+    let steps = parseInt(f.substring(1));
+    for (let s = 0; s < steps; s++) {
+      currentI += o[0];
+      currentJ += o[1];
+      totalSteps++;
+      let pos = currentI + "," + currentJ;
+      if (!positions.has(pos))
+        positions.set(pos, totalSteps);
+    }
+  }
+
+  let shortestMatch = Number.MAX_SAFE_INTEGER;
+  let second = inputs[1].split(",");
+  currentI = 0;
+  currentJ = 0;
+  totalSteps = 0;
+  for (let f of second) {
+    let o = offsets.get(f[0]);
+    let steps = parseInt(f.substring(1));
+    for (let s = 0; s < steps; s++) {
+      currentI += o[0];
+      currentJ += o[1];
+      totalSteps++;
+      let pos = currentI + "," + currentJ;
+      if (positions.has(pos))
+        shortestMatch = Math.min(shortestMatch, totalSteps + positions.get(pos));
+    }
+  }
+  return shortestMatch;
+}
+
+</script>
+</body>

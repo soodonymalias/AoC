@@ -1,0 +1,64 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+//function preprocessInput(inputs) {
+//  return inputs;
+//}
+
+function isValid1(s) {
+  let found_dupe = false;
+  for (let i = 1; i < s.length; i++) {
+    if (s[i] < s[i-1])
+      return false;
+    if (s[i] == s[i-1])
+      found_dupe = true;
+  }
+  return found_dupe;
+}
+
+function isValid2(s) {
+  let found_valid_dupe = false;
+  let current_dupe_length = 1;
+  for (let i = 1; i < s.length; i++) {
+    if (s[i] < s[i-1])
+      return false;
+    if (s[i] == s[i-1]) {
+      current_dupe_length++;
+      continue;
+    }
+    if (current_dupe_length == 2)
+      found_valid_dupe = true;
+    current_dupe_length = 1;
+  }
+  if (current_dupe_length == 2)
+    found_valid_dupe = true;
+  return found_valid_dupe;
+}
+
+function part1(inputs) {
+  let split = inputs[0].split("-");
+  let min = parseInt(split[0]);
+  let max = parseInt(split[1]);
+
+  let valid = 0;
+  for (let i = min; i <= max; i++) {
+    if (isValid1(i.toString()))
+      valid++;
+  }
+  return valid;
+}
+
+function part2(inputs) {
+  let split = inputs[0].split("-");
+  let min = parseInt(split[0]);
+  let max = parseInt(split[1]);
+
+  let valid = 0;
+  for (let i = min; i <= max; i++) {
+    if (isValid2(i.toString()))
+      valid++;
+  }
+  return valid;
+}
+</script>
+</body>
