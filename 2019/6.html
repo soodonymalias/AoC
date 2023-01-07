@@ -1,0 +1,43 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function part1(inputs) {
+  let result = 0;
+  let orbits = new Map();
+  for (let i of inputs) {
+    let s = i.split(")");
+    orbits.set(s[1], s[0]);
+  }
+  for (let o of orbits) {
+    let curr = o[1];
+    while (curr != null) {
+      result++;
+      curr = orbits.get(curr);
+    }
+  }
+  return result;
+}
+
+function part2(inputs) {
+  let orbits = new Map();
+  for (let i of inputs) {
+    let s = i.split(")");
+    orbits.set(s[1], s[0]);
+  }
+  let my_orbits = new Map();
+  let my_curr = orbits.get("YOU");
+  while (my_curr != null) {
+    my_orbits.set(my_curr, my_orbits.size);
+    my_curr = orbits.get(my_curr);
+  }
+  let santa_curr = orbits.get("SAN");
+  let santa_count = 0;
+  while (santa_curr != null) {
+    if (my_orbits.has(santa_curr))
+      return santa_count + my_orbits.get(santa_curr);
+    santa_count++;
+    santa_curr = orbits.get(santa_curr);
+  }
+}
+</script>
+</body>
