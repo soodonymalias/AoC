@@ -4,20 +4,23 @@
 <script>
 function part1(inputs) {
   if (window.is_test) return;
-  let code = parse(inputs);
-  let result = intcode(code, 1);
-  for (let r in result) {
-    if (result[r] != 0 && r < result.length - 1)
-      console.log("FAILED:" + r);
+  let intcode = new IntCode(inputs[0]);
+  intcode.addInput(1);
+  let last_result;
+  while (true) {
+    let result = intcode.exec();
+    if (result == undefined)
+      break;
+    last_result = result;
   }
-  return result[result.length - 1];
+  return last_result;
 }
 
 function part2(inputs) {
   if (window.is_test) return;
-  let code = parse(inputs);
-  let result = intcode(code, 5);
-  return result[result.length - 1];
+  let intcode = new IntCode(inputs[0]);
+  intcode.addInput(5);
+  return intcode.exec();
 }
 
 </script>

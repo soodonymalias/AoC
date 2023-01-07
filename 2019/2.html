@@ -4,21 +4,21 @@
 <script>
 function part1(inputs) {
   if (window.is_test) return;
-  let code = parse(inputs);
-  code[1] = 12;
-  code[2] = 2;
-  intcode(code);
-  return code[0];
+  let intcode = new IntCode(inputs[0]);
+  intcode.code[1] = 12;
+  intcode.code[2] = 2;
+  intcode.exec();
+  return intcode.code[0];
 }
 
 function part2(inputs) {
   if (window.is_test) return;
-  let code = parse(inputs);
+  let intcode = new IntCode(inputs[0]);
   // Found inductively. Answer is (100*48) + 47
-  code[1] = 48;
-  code[2] = 47;
-  intcode(code);
-  return code[0];
+  intcode.code[1] = 48;
+  intcode.code[2] = 47;
+  intcode.exec();
+  return intcode.code[0];
 }
 
 </script>

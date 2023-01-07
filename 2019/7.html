@@ -1,0 +1,69 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script src="/helpers/intcode.js"></script>
+<script>
+function generateAllCombos(values, so_far, result) {
+  if (values.length == 0) {
+    result.push(structuredClone(so_far));
+    return;
+  }
+  for (let i in values) {
+    so_far.push(values[i]);
+    let next = [];
+    for (let j in values) {
+      if (i != j)
+        next.push(values[j]);
+    }
+    generateAllCombos(next, so_far, result);
+    so_far.pop();
+  }
+}
+
+function part1(inputs) {
+  if (window.is_test) return;
+
+  let phases = [];
+  generateAllCombos([0, 1, 2, 3, 4], [], phases);
+  let best = 0;
+  for (let phase_set of phases) {
+    let signal = 0;
+    for (let phase of phase_set) {
+      let intcode = new IntCode(inputs[0]);
+      intcode.addInput(phase);
+      intcode.addInput(signal);
+      signal = intcode.exec();
+    }
+    best = Math.max(best, signal);
+  }
+  return best;
+}
+
+function part2(inputs) {
+  let phases = [];
+  generateAllCombos([5, 6, 7, 8, 9], [], phases);
+  let best = 0;
+  for (let phase_set of phases) {
+    let amps = [];
+    for (let phase of phase_set) {
+      let intcode = new IntCode(inputs[0]);
+      intcode.addInput(phase);
+      amps.push(intcode);
+    }
+    amps[0].addInput(0);
+    let current = 0;
+    let signal = 0;
+    while (true) {
+      let result = amps[current % 5].exec();
+      if (result == undefined)
+        break;
+      current++;
+      signal = result;
+      amps[current % 5].addInput(result);
+    }
+    best = Math.max(best, signal);
+  }
+  return best;
+}
+
+</script>
+</body>

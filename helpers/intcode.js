@@ -1,88 +1,88 @@
-function parse(inputs) {
-  let code = [];
-  let split = inputs[0].split(",");
-  for (let s of split)
-    code.push(parseInt(s));
-  return code;
-}
+class IntCode {
+  constructor(code_string) {
+    this.code = [];
+    for (let s of code_string.split(","))
+      this.code.push(parseInt(s));
+    this.step = 0;
+    this.inputs = [];
 
-function getValues(code, modes, step, paramCount) {
-  let values = [];
-  for (let i = 0; i < paramCount; i++) {
-    let mode = modes % 10;
-    modes = Math.floor(modes / 10);
-    if (mode == 0)
-      values.push(code[code[step+1+i]]);
-    else if (mode == 1)
-      values.push(code[step+1+i]);
+    this.op_map = new Map();
+    this.op_map.set(1, { func: this.add, jump: 4, args: 2 });
+    this.op_map.set(2, { func: this.mul, jump: 4, args: 2 });
+    this.op_map.set(3, { func: this.input, jump : 2, args: 0});
+    this.op_map.set(5, { func: this.jT, jump : 3, args: 2});
+    this.op_map.set(6, { func: this.jF, jump : 3, args: 2});
+    this.op_map.set(7, { func: this.lt, jump : 4, args: 2});
+    this.op_map.set(8, { func: this.eq, jump : 4, args: 2});
   }
-  return values;
-}
 
-function add(code, modes, step, input) {
-  let values = getValues(code, modes, step, 2);
-  code[code[step+3]] = values[0] + values[1];
-}
+  addInput(i) {
+    this.inputs.push(i);
+  }
 
-function mul(code, modes, step, input) {
-  let values = getValues(code, modes, step, 2);
-  code[code[step+3]] = values[0] * values[1];
-}
+  getValues(modes, paramCount) {
+    let values = [];
+    for (let i = 0; i < paramCount; i++) {
+      let mode = modes % 10;
+      modes = Math.floor(modes / 10);
+      if (mode == 0)
+        values.push(this.code[this.code[this.step+1+i]]);
+      else if (mode == 1)
+        values.push(this.code[this.step+1+i]);
+    }
+    return values;
+  }
 
-function input(code, modes, step, input) {
-  code[code[step+1]] = input; 
-}
+  add(values) {
+    this.code[this.code[this.step+3]] = values[0] + values[1];
+  }
 
-function output(code, modes, step, input) {
-  return { action: "output", value: code[code[step+1]] }; 
-}
+  mul(values) {
+    this.code[this.code[this.step+3]] = values[0] * values[1];
+  }
 
-function jT(code, modes, step, input) {
-  let values = getValues(code, modes, step, 2);
-  return { action: "jump", value: values[0] != 0 ? values[1] : null };
-}
+  input(values) {
+    this.code[this.code[this.step+1]] = this.inputs.shift();
+  }
 
-function jF(code, modes, step, input) {
-  let values = getValues(code, modes, step, 2);
-  return { action: "jump", value: values[0] == 0 ? values[1] : null };
-}
-
-function lt(code, modes, step, input) {
-  let values = getValues(code, modes, step, 2);
-  code[code[step+3]] = values[0] < values[1] ? 1 : 0;
-}
-
-function eq(code, modes, step, input) {
-  let values = getValues(code, modes, step, 2);
-  code[code[step+3]] = values[0] == values[1] ? 1 : 0;
-}
-
-let op_map = new Map();
-op_map.set(1, { func: add, jump: 4 });
-op_map.set(2, { func: mul, jump: 4 });
-op_map.set(3, { func: input, jump : 2});
-op_map.set(4, { func: output, jump : 2});
-op_map.set(5, { func: jT, jump : 3});
-op_map.set(6, { func: jF, jump : 3});
-op_map.set(7, { func: lt, jump : 4});
-op_map.set(8, { func: eq, jump : 4});
-
-function intcode(code, input) {
-  let outputs = [];
-  let step = 0;
-  while (true) {
-    let cmd = code[step];
-    if (cmd == 99)
-      break;
-    let op = op_map.get(cmd % 100);
-    let result = op.func(code, Math.floor(cmd / 100), step, input);
-    step += op.jump;
-    if (result != undefined) {
-      if (result.action == "output")
-        outputs.push(result.value);
-      if (result.action == "jump" && result.value != null)
-        step = result.value;
+  jT(values) {
+    if (values[0] != 0) {
+      this.step = values[1];
+      return "didjump";
     }
   }
-  return outputs;
+
+  jF(values) {
+    if (values[0] == 0) {
+      this.step = values[1];
+      return "didjump";
+    }
+  }
+
+  lt(values) {
+    this.code[this.code[this.step+3]] = values[0] < values[1] ? 1 : 0;
+  }
+
+  eq(values) {
+    this.code[this.code[this.step+3]] = values[0] == values[1] ? 1 : 0;
+  }
+
+  exec() {
+    while (true) {
+      let cmd = this.code[this.step];
+      if (cmd == 99) // halt
+        return undefined;
+      if (cmd % 100 == 4) { // output
+        let result = this.code[this.code[this.step+1]];
+        this.step += 2;
+        return result;
+      }
+      let op = this.op_map.get(cmd % 100);
+      let modes = Math.floor(cmd / 100);
+      let values = this.getValues(modes, op.args);
+      let result = op.func.call(this, values);
+      if (result != "didjump")
+        this.step += op.jump;
+    }
+  }
 }
