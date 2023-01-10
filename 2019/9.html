@@ -1,0 +1,20 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script src="/helpers/intcode.js"></script>
+<script>
+function part1(inputs) {
+  if (window.is_test) return;
+  let i = new IntCode(inputs[0]);
+  i.addInput(1);
+  return i.exec();
+}
+
+function part2(inputs) {
+  if (window.is_test) return;
+  let i = new IntCode(inputs[0]);
+  i.addInput(2);
+  return i.exec();
+}
+
+</script>
+</body>
