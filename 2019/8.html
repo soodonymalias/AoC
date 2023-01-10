@@ -1,0 +1,55 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script src="/helpers/print_bitmap.js"></script>
+<script>
+function part1(inputs) {
+  if (window.is_test) return;
+  let fewest_zeroes = Number.MAX_SAFE_INTEGER;
+  let fewest_result;
+
+  let current_zeroes = 0;
+  let current_ones = 0;
+  let current_twos = 0;
+
+  for (let i in inputs[0]) {
+    if (inputs[0][i] == "0")
+      current_zeroes++;
+    if (inputs[0][i] == "1")
+      current_ones++;
+    if (inputs[0][i] == "2")
+      current_twos++;
+    if (i % 150 == 149) {
+      if (current_zeroes < fewest_zeroes) {
+        fewest_zeroes = current_zeroes;
+        fewest_result = current_ones * current_twos;
+      }
+      current_zeroes = 0;
+      current_ones = 0;
+      current_twos = 0;
+    }
+  }
+  return fewest_result;
+}
+
+function part2(inputs) {
+  if (window.is_test) return;
+  let image = [];
+  for (let i = 0; i < 6; i++)
+    image.push(new Array(25));
+
+  for (let i in inputs[0]) {
+    let slot = i % 150;
+    let col = slot % 25;
+    let row = Math.floor(slot / 25);
+    if (inputs[0][i] == "2" || image[row][col] != undefined)
+      continue;
+    if (inputs[0][i] == "0")
+      image[row][col] = false;
+    if (inputs[0][i] == "1")
+      image[row][col] = true;
+  }
+  printBitmap(image, 6, 25);
+}
+
+</script>
+</body>
