@@ -1,0 +1,140 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function parse(inputs) {
+  let grid = [];
+  for (let i of inputs) {
+    let row = [];
+    for (let j of i)
+      row.push(j);
+    grid.push(row);
+  }
+  return grid;
+}
+
+function getOffsets(n) {
+  let offsets = [{i: -1, j: 0}];
+
+  let next = [];
+  for (let i = -(n-1); i < 0; i++) {
+    for (let j = 1; j < n; j++) {
+      if (gcd(i, j) == 1)
+        next.push({i, j});
+    }
+  }
+  next.sort((a, b) => (a.i / a.j) > (b.i / b.j) ? 1 : -1);
+  offsets.push(...next);
+  offsets.push({i: 0, j: 1});
+
+  next = [];
+  for (let i = 1; i < n; i++) {
+    for (let j = 1; j < n; j++) {
+      if (gcd(i, j) == 1)
+        next.push({i, j});
+    }
+  }
+  next.sort((a, b) => (a.i / a.j) > (b.i / b.j) ? 1 : -1);
+  offsets.push(...next);
+  offsets.push({i: 1, j: 0});
+
+  next = [];
+  for (let i = 1; i < n; i++) {
+    for (let j = -(n-1); j < 0; j++) {
+      if (gcd(i, j) == 1)
+        next.push({i, j});
+    }
+  }
+  next.sort((a, b) => (a.i / a.j) > (b.i / b.j) ? 1 : -1);
+  offsets.push(...next);
+  offsets.push({i: 0, j: -1});
+
+  next = [];
+  for (let i = -(n-1); i < 0; i++) {
+    for (let j = -(n-1); j < 0; j++) {
+      if (gcd(i, j) == 1)
+        next.push({i, j});
+    }
+  }
+  next.sort((a, b) => (a.i / a.j) > (b.i / b.j) ? 1 : -1);
+  offsets.push(...next);
+  return offsets;
+}
+
+function gcd(x, y) {
+  x = Math.abs(x);
+  y = Math.abs(y);
+  for (let d = Math.floor(Math.min(x, y)); d > 1; d--) {
+    if (Number.isInteger(x / d) && Number.isInteger(y / d)) {
+      return d;
+    }
+  }
+  return 1;
+}
+
+function lineOfSight(grid, i, j) {
+  if (grid[i][j] != "#") return 0;
+
+  let seen = 0;
+  let offsets = getOffsets(grid.length);
+  for (let o of offsets) {
+    let x = i + o.i;
+    let y = j + o.j;
+    while (x >= 0 && x < grid.length && y >= 0 && y < grid.length) {
+      if (grid[x][y] == "#") {
+        seen++;
+        break;
+      }
+      x += o.i;
+      y += o.j;
+    }
+  }
+  return seen;
+}
+
+let bestI;
+let bestJ;
+let grid;
+
+function part1(inputs) {
+  grid = parse(inputs);
+  let best = 0;
+  for (let i = 0; i < grid.length; i++) {
+    for (let j = 0; j < grid.length; j++) {
+      let visible = lineOfSight(grid, i, j);
+      if (visible > best) {
+        best = visible;
+        bestI = i;
+        bestJ = j;
+      }
+    }
+  }
+  return best;
+}
+
+function part2(inputs) {
+  let offsets = getOffsets(grid.length);
+  let index = 0;
+  let destroyed = 0;
+  let destroyedI;
+  let destroyedJ;
+  while (destroyed < 200) {
+    let o = offsets[index % offsets.length];
+    let x = bestI + o.i;
+    let y = bestJ + o.j;
+    while (x >= 0 && x < grid.length && y >= 0 && y < grid.length) {
+      if (grid[x][y] == "#") {
+        grid[x][y] = ".";
+        destroyedI = x;
+        destroyedJ = y;
+        destroyed++;
+        break;
+      }
+      x += o.i;
+      y += o.j;
+    }
+    index++;
+  }
+  return destroyedJ*100 + destroyedI;
+}
+</script>
+</body>
