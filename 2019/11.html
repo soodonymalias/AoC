@@ -1,0 +1,90 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script src="/helpers/intcode.js"></script>
+<script src="/helpers/print_bitmap.js"></script>
+<script>
+class TestIntCode {
+  constructor() {
+    this.outputs = [1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, undefined]
+  }
+  addInput() {}
+  exec() {
+    return this.outputs.shift();
+  }
+}
+
+let dirs = [[0, -1], [1, 0], [0, 1], [-1 ,0]]
+  
+function part1(inputs) {
+  let i;
+  if (window.is_test)
+    i = new TestIntCode();
+  else
+    i = new IntCode(inputs[0]);
+
+  let currX = 0;
+  let currY = 0;
+  let currDir = 0;
+  let painted = new Map();
+
+  while (true) {
+    let currColor = painted.get(currX + "," + currY);
+    if (currColor == undefined) currColor = 0;
+    i.addInput(currColor);
+
+    let value = i.exec();
+    let rotate = i.exec();
+    if (value == undefined)
+      break;
+    painted.set(currX + "," + currY, value);
+
+    if (rotate == 0)
+      currDir--;
+    else
+      currDir++;
+    currDir = (currDir + 4) % 4;
+
+    currX += dirs[currDir][0];
+    currY += dirs[currDir][1];
+  }
+  return painted.size;
+}
+
+function part2(inputs) {
+  if (window.is_test)
+    return;
+  let i = new IntCode(inputs[0]);
+
+  let currX = 0;
+  let currY = 0;
+  let currDir = 0;
+  let painted = new Array(100);
+  for (let i = 0; i < 100; i++) {
+    painted[i] = new Array(100);
+  }
+  painted[0][0] = 1;
+
+  while (true) {
+    let currColor = painted[currX][currY];
+    if (currColor == undefined) currColor = 0;
+    i.addInput(currColor);
+
+    let value = i.exec();
+    let rotate = i.exec();
+    if (value == undefined)
+      break;
+    painted[currX][currY] = value;
+
+    if (rotate == 0)
+      currDir--;
+    else
+      currDir++;
+    currDir = (currDir + 4) % 4;
+
+    currX += dirs[currDir][0];
+    currY += dirs[currDir][1];
+  }
+  printBitmap(painted, 100, 100);
+}
+</script>
+</body>
