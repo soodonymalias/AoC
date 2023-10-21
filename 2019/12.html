@@ -1,0 +1,109 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script src="/helpers/math.js"></script>
+<script>
+function makeStars(inputs) {
+  let stars = [];
+  for (let i of inputs) {
+    i = i.split(">")[0].split("<")[1];
+    let parts = i.split(", ");
+
+    let star = {};
+    star.x = parseInt(parts[0].split("=")[1]);
+    star.y = parseInt(parts[1].split("=")[1]);
+    star.z = parseInt(parts[2].split("=")[1]);
+    star.vx = 0;
+    star.vy = 0;
+    star.vz = 0;
+    stars.push(star);
+  } 
+  return stars;
+}
+
+function update(stars) {
+  let starCount = stars.length;
+  for (let j = 0; j < starCount - 1; j++) {
+    for (let k = j + 1; k < starCount; k++) {
+      if (stars[j].x > stars[k].x) {
+        stars[j].vx--;
+        stars[k].vx++;
+      } else if (stars[j].x < stars[k].x) {
+        stars[j].vx++;
+        stars[k].vx--;
+      }
+      if (stars[j].y > stars[k].y) {
+        stars[j].vy--;
+        stars[k].vy++;
+      } else if (stars[j].y < stars[k].y) {
+        stars[j].vy++;
+        stars[k].vy--;
+      }
+      if (stars[j].z > stars[k].z) {
+        stars[j].vz--;
+        stars[k].vz++;
+      } else if (stars[j].z < stars[k].z) {
+        stars[j].vz++;
+        stars[k].vz--;
+      }
+    }
+  }
+  for (let star of stars) {
+    star.x += star.vx;
+    star.y += star.vy;
+    star.z += star.vz;
+  }
+}
+
+function energy(stars) {
+  let result = 0;
+  for (let star of stars) {
+    result += (Math.abs(star.x)+ Math.abs(star.y) + Math.abs(star.z)) * (Math.abs(star.vx) + Math.abs(star.vy) + Math.abs(star.vz));
+  }
+  return result;
+}
+
+function findCycle(states, star, prop) {
+  for (let i = 0; i < states.length / 2; i++) {
+    if (states[i][star][prop] != states[states.length-i-1][star][prop]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function part1(inputs) {
+  let stars = makeStars(inputs);
+  let steps = window.is_test ? 10 : 1000;
+  for (let i = 0; i < steps; i++) {
+    update(stars);
+  }
+  return energy(stars);
+}
+
+function part2(inputs) {
+  let stars = makeStars(inputs);
+
+  let states = [];
+  let cycles = [];
+  let cyclesToFind = new Set();
+  for (let i = 0; i < stars.length; i++) {
+    for (let prop of ["x", "y", "z"]) {
+      cyclesToFind.add({ i: i, prop: prop});
+    }
+  }
+
+  for (let step = 0; step < 1000000 && cyclesToFind.size > 0; step++) {
+    states.push(structuredClone(stars));
+    update(stars);
+    if (step == 0) continue;
+    for (let cTF of cyclesToFind) {
+      if (findCycle(states, cTF.i, cTF.prop)) {
+        cycles.push(step+1);
+        cyclesToFind.delete(cTF);
+      }
+    }
+  }
+  return lcm(cycles);
+}
+</script>
+</body>
