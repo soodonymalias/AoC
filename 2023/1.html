@@ -1,0 +1,39 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function tally(inputs, valueCalculator) {
+  let tally = 0;
+  for (let i of inputs) {
+    let first = -1;
+    let last;
+    for (let j = 0; j < i.length; j++) {
+      let val = valueCalculator(inputs, i, j);
+      if (Number.isInteger(val)) {
+        last = val;
+        if (first == -1) first = val;
+      }
+    }
+    tally += (first*10) + last;
+  }
+  return tally;
+}
+
+function part1(inputs) {
+  return tally(inputs, (inputs, i, j) => parseInt(i.charAt(j), 10));
+}
+
+function part2(inputs) {
+  const textNumbers = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
+  return tally(inputs, (inputs, i, j) => {
+    let val = parseInt(i.charAt(j), 10);
+    if (Number.isInteger(val))
+      return val;
+    for (let t = 0; t < textNumbers.length; t++) {
+      if (i.substring(j, j+textNumbers[t].length) == textNumbers[t])
+        return t;
+    }
+  });
+}
+
+</script>
+</body>
