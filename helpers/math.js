@@ -14,6 +14,7 @@ function gcd(a, b) {
 function lcm(values) {
   let curr = 1;
   for (let v of values) {
+    if (v == 0) return 0;
     curr = (curr * v) / gcd(curr, v);
   }
   return curr;
