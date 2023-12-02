@@ -1,0 +1,56 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script src="/helpers/math.js"></script>
+<script>
+function roundVals(r) {
+  let draws = r.split(",");
+  let vals = { red: 0, blue: 0, green: 0 };
+  for (let d of draws) {
+    let count = parseInt(d.split(" ")[1], 10);
+    let color = d.split(" ")[2];
+    vals[color] = count;
+  }
+  return vals;
+}
+
+function part1(inputs) {
+  let possibleGames = 0;
+  for (let i = 0; i < inputs.length; i++) {
+    let game = inputs[i].split(":")[1];
+    let rounds = game.split(";");
+    let possible = true;
+    for (let r of rounds) {
+      let vals = roundVals(r);
+      if (vals.red > 12 || vals.green > 13 || vals.blue > 14) {
+        possible = false;
+        break;
+      }
+    }
+    if (possible)
+      possibleGames += (i+1);
+  }
+  return possibleGames;
+}
+
+function part2(inputs) {
+  let sum = 0;
+  for (let i = 0; i < inputs.length; i++) {
+    let game = inputs[i].split(":")[1];
+    let rounds = game.split(";");
+    let red = 0;
+    let green = 0;
+    let blue = 0;
+    for (let r of rounds) {
+      let vals = roundVals(r);
+      console.log(vals);
+      red = Math.max(red, vals.red);
+      green = Math.max(green, vals.green);
+      blue = Math.max(blue, vals.blue);
+    }
+    sum += (red * green * blue);
+  }
+  return sum;
+}
+
+</script>
+</body>
