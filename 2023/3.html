@@ -1,0 +1,87 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let grid = new Array(inputs.length);
+  for (let i = 0; i < inputs.length; i++) {
+    grid[i] = new Array();
+    for (let j = 0; j < inputs[i].length; j++)
+      grid[i].push(inputs[i].charAt(j));
+  }
+  return grid;
+}
+
+function getSymbolCoords(grid) {
+  let coords = new Array();
+  for (let i = 0; i < grid.length; i++) {
+    for (let j = 0; j < grid.length; j++) {
+      if (grid[i][j] == ".") continue;
+      if (Number.isInteger(parseInt(grid[i][j], 10))) continue;
+      coords.push([i,j]);
+    }
+  }
+  return coords;
+}
+
+function findNum(grid, i, j, numCoords) {
+  let start = j;
+  let end = j;
+  while (start > 0 && Number.isInteger(parseInt(grid[i][start-1], 10))) {
+    start--;
+  }
+  while (end < grid.length - 1 && Number.isInteger(parseInt(grid[i][end+1], 10))) {
+    end++;
+  }
+  let result = 0;
+  for (let n = start; n <= end; n++) {
+    result *= 10;
+    result += parseInt(grid[i][n], 10);
+    numCoords.add(i + "," + n);
+  }
+  return result;
+}
+
+function forEachNeighboringNumber(grid, x, y, numCoords, func) {
+  for (let i = x - 1; i <= x + 1; i++) {
+    for (let j = y - 1; j <= y + 1; j++) {
+      if (i == x && j == y) continue;
+      if (i < 0 || j < 0 || i >= grid.length || j >= grid.length) continue;
+      if (!Number.isInteger(parseInt(grid[i][j], 10))) continue;
+      if (numCoords.has(i + "," + j)) continue;
+      func(i, j);
+    }
+  }
+}
+
+function part1(grid) {
+  let coords = getSymbolCoords(grid);
+  let sum = 0;
+  let numCoords = new Set();
+  for (let c of coords) {
+    forEachNeighboringNumber(grid, c[0], c[1], numCoords, (i, j) => {
+      sum += findNum(grid, i, j, numCoords);
+    });
+  }
+  return sum;
+}
+
+function part2(grid) {
+  let coords = getSymbolCoords(grid);
+  let sum = 0;
+  let numCoords = new Set();
+  for (let c of coords) {
+    if (grid[c[0]][c[1]] != "*") continue;
+    let gearNeighborCount = 0;
+    let gearRatio = 1;
+    forEachNeighboringNumber(grid, c[0], c[1], numCoords, (i, j) => {
+      gearRatio *= findNum(grid, i, j, numCoords);
+      gearNeighborCount++;
+    });
+    if (gearNeighborCount == 2)
+      sum += gearRatio;
+  }
+  return sum;
+}
+
+</script>
+</body>
