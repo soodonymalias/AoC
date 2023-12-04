@@ -1,0 +1,64 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let cards = [];
+  for (let i of inputs) {
+    let card = i.split(":")[1].split(" | ");
+    let myNumbers = card[0].split(" ");
+    let winningNumbers = card[1].split(" ");
+    let c = { winners: new Set(), mine: [] }
+    for (let w of winningNumbers) {
+      let val = parseInt(w, 10);
+      if (Number.isInteger(val))
+        c.winners.add(val);
+    }
+    for (let m of myNumbers) {
+      let val = parseInt(m, 10);
+      if (Number.isInteger(val))
+        c.mine.push(val);
+    }
+    cards.push(c);
+  }
+  return cards;
+}
+
+function part1(cards) {
+  let total = 0;
+  for (let c of cards) {
+    let matches = 0;
+    for (let m of c.mine) {
+      if (c.winners.has(m)) {
+        matches++;
+      }
+    }
+    if (matches != 0)
+      total += Math.pow(2, matches-1);
+  }
+  return total;
+}
+
+function part2(cards) {
+  let cardCount = new Array(cards.length);
+  cardCount.fill(1);
+
+  for (let i = 0; i < cards.length; i++) {
+    let c = cards[i];
+    let matches = 0;
+    for (let m of c.mine) {
+      if (c.winners.has(m)) {
+        matches++;
+      }
+    }
+    for (let n = 0; n < matches; n++) {
+      cardCount[i+1+n] += cardCount[i];
+    }
+  }
+  let result = 0;
+  for (let i = 0; i < cards.length; i++) {
+    result += cardCount[i];
+  }
+  return result;
+}
+</script>
+</body>
