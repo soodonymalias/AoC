@@ -1,0 +1,95 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let startVals = [];
+  let sVals = inputs[0].split(" ");
+  for (let  i =1; i < sVals.length; i++)
+    startVals.push(parseInt(sVals[i]));
+ 
+  let maps = []
+  for (let i = 2; i < inputs.length; i++) {
+    i++;
+    let ranges = [];
+    while(i < inputs.length && inputs[i].length > 0) {
+      let next = {};
+      let vals = inputs[i].split(" ");
+      next.dest = parseInt(vals[0]);
+      next.src = parseInt(vals[1]);
+      next.length = parseInt(vals[2]);
+      i++;
+      ranges.push(next);
+    }
+    maps.push(ranges);
+  }
+  return [startVals, maps];
+}
+
+function part1([startVals, maps]) {
+  let vals = structuredClone(startVals);
+  for (let m of maps) {
+    let newVals = [];
+    for (let v of vals) {
+      let foundRange = false;
+      for (let row of m) {
+        if (row.src <= v && v < row.src + row.length) {
+          newVals.push(row.dest + v - row.src);
+          foundRange = true;
+          break;
+        }
+      }
+      if (!foundRange)
+        newVals.push(v);
+    }
+    vals = newVals;
+  }
+  let min = Number.MAX_SAFE_INTEGER;
+  for (let v of vals) {
+    min = Math.min(min, v);
+  }
+  return min;
+}
+
+function part2([startVals, maps]) {
+  let vals = [];
+  for (let i = 0; i < startVals.length; i+=2) {
+    vals.push({ start : startVals[i], end: startVals[i] + startVals[i+1] });
+  }
+
+  for (let m of maps) {
+    let newVals = [];
+    for (let v of vals) {
+      let foundRange = false;
+      for (let row of m) {
+        if (row.src >= v.end) continue;
+        if (row.src + row.length < v.start) continue;
+        foundRange = true;
+        if (row.src <= v.start && v.end <= row.src + row.length) {
+          newVals.push({ start: row.dest + v.start - row.src, end : row.dest + v.end - row.src });
+          break;
+        }
+        let newVal = { start: row.dest - row.src + Math.max(row.src, v.start), end: row.dest - row.src + Math.min(row.src + row.length, v.end) }
+        if (newVal.start == newVal.end) continue;
+        newVals.push(newVal);
+        if (v.start < row.src) {
+          vals.push({ start: v.start, end: row.src });
+        }
+        if (v.end > row.src + row.length) {
+          vals.push({ start: row.src + row.length, end: v.end });
+        }
+        break;
+      }
+      if (!foundRange)
+        newVals.push(v);
+    }
+    vals = newVals;
+  }
+  let min = Number.MAX_SAFE_INTEGER;
+  for (let v of vals) {
+    min = Math.min(min, v.start);
+  }
+  return min;
+}
+
+</script>
+</body>
