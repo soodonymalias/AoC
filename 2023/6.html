@@ -1,0 +1,45 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function countWins(time, distance) {
+  let wins = 0;
+  for (let t = 0; t < time; t++) {
+    if (t * (time - t) > distance)
+      wins++;
+  }
+  return wins;
+}
+
+function part1(inputs) {
+  let times = []
+  let distances = []
+  let t = inputs[0].split(" ");
+  for (let i = 1; i < t.length; i++) {
+    if (t[i].length > 0) times.push(parseInt(t[i]));
+  }
+  let d = inputs[1].split(" ");
+  for (let i = 1; i < d.length; i++) {
+    if (d[i].length > 0) distances.push(parseInt(d[i]));
+  }
+  let product = 1;
+  for (let i = 0; i < times.length; i++) {
+    product *= countWins(times[i], distances[i]);
+  }
+  return product;
+}
+
+function part2(inputs) {
+  let time = ""
+  let distance = "";
+  let t = inputs[0].split(" ");
+  for (let i = 1; i < t.length; i++) {
+    if (t[i].length > 0) time += t[i];
+  }
+  let d = inputs[1].split(" ");
+  for (let i = 1; i < d.length; i++) {
+    if (d[i].length > 0) distance += d[i];
+  }
+  return countWins(parseInt(time), parseInt(distance));
+}
+</script>
+</body>

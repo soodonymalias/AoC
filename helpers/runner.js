@@ -29,3 +29,19 @@ async function run() {
 };
 
 window.onload = run;
+
+function toGrid(inputs, split = null, shouldParseInts = null) {
+  let parse = shouldParseInts == "parseInt";
+  let grid = new Array(inputs.length);
+  for (let i = 0; i < inputs.length; i++) {
+    let rowVals = split == null ? inputs[i] : inputs[i].split(split);
+    grid[i] = new Array(rowVals.length);
+    for (let j = 0; j < rowVals.length; j++) {
+      if (parse)
+        grid[i][j] = parseInt(rowVals[j], 10);
+      else
+        grid[i][j] = rowVals[j];
+    }
+  }
+  return grid;
+}
