@@ -1,0 +1,103 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function rankHandPart1(hand) {
+  let vals = new Map();
+  for (let h of hand) {
+    if (vals.has(h)) {
+      vals.set(h, vals.get(h) + 1);
+    } else {
+      vals.set(h, 1);
+    }
+  }
+  if (vals.size == 1) return 7;
+  if (vals.size == 2) {
+    if (vals.get(hand[0]) == 1 || vals.get(hand[0]) == 4)
+      return 6;
+    else
+      return 5;
+  }
+  let pairs = 0;
+  for (let v of vals.values()) {
+    if (v == 3) return 4;
+    if (v == 2) pairs++;
+  }
+  if (pairs == 2) return 3;
+  if (pairs == 1) return 2;
+  return 1;
+}
+
+function rankHandPart2(hand) {
+  let vals = new Map();
+  for (let h of hand) {
+    if (vals.has(h)) {
+      vals.set(h, vals.get(h) + 1);
+    } else {
+      vals.set(h, 1);
+    }
+  }
+  let jokers = vals.has("J") ? vals.get("J") : 0;
+  if (vals.size == 1 || (vals.size == 2 && jokers > 0)) return 7;
+  if (vals.size == 2 || (vals.size == 3 && jokers > 0)) {
+    for (let k of vals.keys()) {
+       if (k == "J") continue;
+       let v = vals.get(k);
+       if ((v + jokers) == 4) return 6;
+    }
+    return 5;
+  }
+  let pairs = 0;
+  for (let k of vals.keys()) {
+    if (k == "J") continue;
+    let v = vals.get(k);
+    if (v + jokers == 3) return 4;
+    if (v == 2) pairs++;
+  }
+  if (pairs == 2) return 3;
+  if (pairs == 1 || jokers == 1) return 2;
+  return 1;
+}
+
+function scoreHand(hand, rankHand, cardOrder) {
+  let overall = rankHand(hand);
+  for (let h of hand) {
+    overall *= 13;
+    overall += cardOrder.indexOf(h);
+  }
+  return overall;
+}
+
+function run(inputs, rankHand, cardOrder) {
+  let hands = []
+  for (let i of inputs) {
+    let handParts = i.split(" ");
+    let hand = [];
+    for (let s = 0; s < handParts[0].length; s++)
+      hand.push(handParts[0].charAt(s));
+    hands.push({ hand: hand, wager: parseInt(handParts[1]) });
+  }
+  hands.sort((a, b) => {
+    let aScore = scoreHand(a.hand, rankHand, cardOrder);
+    let bScore = scoreHand(b.hand, rankHand, cardOrder);
+    if (aScore < bScore) return -1;
+    if (aScore > bScore) return 1;
+    return 0;
+  });
+
+  let result = 0;
+  for (let i = 0; i < hands.length; i++) {
+    result += hands[i].wager * (i+1)
+  }
+  return result;
+}
+
+function part1(inputs) {
+  return run(inputs, rankHandPart1, "23456789TJQKA");
+}
+
+function part2(inputs) {
+  return run(inputs, rankHandPart2, "J23456789TQKA");
+}
+
+</script>
+</body>
