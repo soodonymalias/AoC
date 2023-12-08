@@ -1,0 +1,61 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script src="/helpers/math.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let instructions = inputs[0];
+  let graph = new Map();
+  for (let i = 2; i < inputs.length; i++) {
+    let key = inputs[i].substring(0, 3);
+    graph.set(key, { left: inputs[i].substring(7, 10), right: inputs[i].substring(12, 15) });
+  }
+  return { instructions: instructions, graph: graph }
+}
+
+function part1(input) {
+  if (window.is_test) return;
+  let steps = 0;
+  let instructions = input.instructions;
+  let curr = "AAA";
+  while (true) {
+    if (curr == "ZZZ") break;
+    let nextGraph = input.graph.get(curr);
+    if (instructions.charAt(steps%instructions.length) == "L") {
+      curr = nextGraph.left;
+    } else {
+      curr = nextGraph.right;
+    }
+    steps++;
+  }
+  return steps;
+}
+
+function part2(input) {
+  let steps = 0;
+  let instructions = input.instructions;
+  let curr = []
+  for (let key of input.graph.keys()) {
+    if (key.charAt(2) == "A") curr.push(key);
+  }
+
+  let resuls = []
+  for (let i = 0; i < curr.length; i++) {
+    let c = curr[i];
+    let steps = 0;
+    while (true) {
+      if (c.charAt(2) == "Z") break;
+      let nextGraph = input.graph.get(c);
+      if (instructions.charAt(steps%instructions.length == "L") {
+        c = nextGraph.left;
+      } else {
+        c = nextGraph.right;
+      }
+      steps++;
+    }
+    resuls.push(steps);
+  }
+  return lcm(resuls);
+}
+
+</script>
+</body>
