@@ -1,0 +1,35 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function extrap(vals, direction) {
+  let newVals = [];
+  let allZeroes = true;
+  for (let i = 1; i < vals.length; i++) {
+    let next = vals[i]-vals[i-1];
+    if (next != 0) allZeroes = false;
+    newVals.push(next);
+  }
+  if (allZeroes)
+    return direction == "back" ? vals[vals.length-1] : vals[0];
+  let result = extrap(newVals, direction);
+  return direction == "back" ?  vals[vals.length-1] + result : vals[0] - result;
+}
+
+function run(inputs, direction) {
+  let result = 0;
+  for (let i of inputs) {
+    result += extrap(i.split(" ").map(x => parseInt(x)), direction);
+  }
+  return result;
+}
+
+function part1(inputs) {
+  return run(inputs, "back");
+}
+
+function part2(inputs) {
+  return run(inputs, "front");
+}
+
+</script>
+</body>
