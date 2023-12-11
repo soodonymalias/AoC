@@ -1,0 +1,43 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  return toGrid(inputs, "", "");
+}
+
+function distance(grid, expansion) {
+  let galaxies = [];
+  let galaxiesI = new Set();
+  let galaxiesJ = new Set();
+  for (let i = 0; i < grid.length; i++) {
+    for (let j = 0; j < grid[i].length; j++) {
+      if (grid[i][j] == "#") {
+        galaxies.push({i, j});
+        galaxiesI.add(i);
+        galaxiesJ.add(j);
+      }
+    }
+  }
+  let distSum = 0;
+  for (let a = 0; a < galaxies.length; a++) {
+    for (let b = a + 1; b < galaxies.length; b++) {
+      for (let i = Math.min(galaxies[a].i, galaxies[b].i) + 1; i <= Math.max(galaxies[a].i, galaxies[b].i); i++) {
+        distSum += galaxiesI.has(i) ? 1 : expansion;
+      }
+      for (let j = Math.min(galaxies[a].j, galaxies[b].j) + 1; j <= Math.max(galaxies[a].j, galaxies[b].j); j++) {
+        distSum += galaxiesJ.has(j) ? 1 : expansion;
+      }
+    }
+  }
+  return distSum;
+}
+
+function part1(grid) {
+  return distance(grid, 2);
+}
+
+function part2(grid) {
+  return distance(grid, 1000000);
+}
+</script>
+</body>
