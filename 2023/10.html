@@ -1,0 +1,184 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  return toGrid(inputs, "", "");
+}
+
+function findS(grid) {
+  for (let i = 0; i < grid.length; i++) {
+    for (let j = 0; j < grid[i].length; j++) {
+      if (grid[i][j] == "S") return { i, j };
+    }
+  }
+}
+
+function addToVisited(visited, i, j) {
+  visited.add(i + "," + j);
+}
+
+function isVisited(visited, i, j) {
+  return visited.has(i + "," + j);
+}
+
+
+function part1(grid) {
+  let c = findS(grid);
+  let dist = 0;
+  let visited = new Set();
+  addToVisited(visited, c.i, c.j);
+  while (c != undefined) {
+    let next;
+      if (c.i > 0 &&
+          (grid[c.i][c.j] == "S" || grid[c.i][c.j] == "|" || grid[c.i][c.j] == "L" || grid[c.i][c.j] == "J") &&
+          (grid[c.i-1][c.j] == "|" || grid[c.i-1][c.j] == "7" || grid[c.i-1][c.j] == "F") &&
+          !isVisited(visited, c.i-1, c.j)) {
+        next = { i: c.i-1, j: c.j};
+        addToVisited(visited, c.i-1, c.j);
+      } else if (c.j > 0 &&
+          (grid[c.i][c.j] == "S" || grid[c.i][c.j] == "-" || grid[c.i][c.j] == "J" || grid[c.i][c.j] == "7") &&
+          (grid[c.i][c.j-1] == "-" || grid[c.i][c.j-1] == "L" || grid[c.i][c.j-1] == "F") &&
+          !isVisited(visited, c.i, c.j-1)) {
+        next = { i: c.i, j: c.j-1};
+        addToVisited(visited, c.i, c.j-1);
+      } else if (c.j < grid[c.i].length - 1 &&
+          (grid[c.i][c.j] == "S" || grid[c.i][c.j] == "-" || grid[c.i][c.j] == "L" || grid[c.i][c.j] == "F") &&
+          (grid[c.i][c.j+1] == "-" || grid[c.i][c.j+1] == "J" || grid[c.i][c.j+1] == "7") &&
+          !isVisited(visited, c.i, c.j+1)) {
+        next = { i: c.i, j: c.j+1};
+        addToVisited(visited, c.i, c.j+1);
+      } else if (c.i < grid.length - 1 &&
+          (grid[c.i][c.j] == "S" || grid[c.i][c.j] == "|" || grid[c.i][c.j] == "7" || grid[c.i][c.j] == "F") &&
+          (grid[c.i+1][c.j] == "|" || grid[c.i+1][c.j] == "L" || grid[c.i+1][c.j] == "J") &&
+          !isVisited(visited, c.i+1, c.j)) {
+        next = { i: c.i+1, j: c.j};
+        addToVisited(visited, c.i+1, c.j);
+      }
+    c = next;
+    dist++;
+  }
+  return dist / 2;
+}
+
+function maybeAdd(grid, n, set) {
+  if (n.i < 0 || n.j < 0 || n.i >= grid.length || n.j >= grid[n.i].length)
+    return;
+  if (isVisited(set, n.i, n.j)) {
+    return;
+  }
+  addToVisited(set, n.i, n.j);
+}
+
+function flood(grid, set, visited) {
+  let toDo = structuredClone(set);
+  const neighbors = [
+    [1, 1], [1, 0], [1, -1],
+    [0, 1], [0, -1],
+    [-1 , 1], [-1, 0], [-1, -1]
+  ];
+  for (let t of toDo) {
+    let tObj = { i: parseInt(t.split(",")[0]), j: parseInt(t.split(",")[1]) };
+    for (let neighbor of neighbors) {
+      let n = { i: tObj.i + neighbor[0], j: tObj.j + neighbor[1] }
+      if (n.i < 0 || n.j < 0 || n.i >= grid.length || n.j >= grid[n.i].length)
+        continue;
+      if (isVisited(visited, n.i, n.j) || isVisited(set, n.i, n.j)) {
+        continue;
+      }
+      toDo.add(n.i + "," + n.j);
+      addToVisited(set, n.i, n.j);
+    }
+  }
+  return set;
+}
+
+function part2(grid) {
+  let c = findS(grid);
+  let visited = new Set();
+  addToVisited(visited, c.i, c.j);
+  let left = new Set();
+  let right = new Set();
+  while (c != undefined) {
+    let next;
+      if (c.i > 0 &&
+          (grid[c.i][c.j] == "S" || grid[c.i][c.j] == "|" || grid[c.i][c.j] == "L" || grid[c.i][c.j] == "J") &&
+          (grid[c.i-1][c.j] == "|" || grid[c.i-1][c.j] == "7" || grid[c.i-1][c.j] == "F") &&
+          !isVisited(visited, c.i-1, c.j)) {
+        next = { i: c.i-1, j: c.j};
+        addToVisited(visited, c.i-1, c.j);
+        maybeAdd(grid, { i: next.i, j: next.j-1 }, left);
+        maybeAdd(grid, { i: next.i, j: next.j+1 }, right);
+        if (grid[next.i][next.j] == "7") {
+          maybeAdd(grid, { i: next.i-1, j: next.j+1 }, right);
+          maybeAdd(grid, { i: next.i-1, j: next.j }, right);
+        }
+        if (grid[next.i][next.j] == "F") {
+          maybeAdd(grid, { i: next.i-1, j: next.j-1 }, left);
+          maybeAdd(grid, { i: next.i-1, j: next.j }, left);
+        }
+      } else if (c.j > 0 &&
+          (grid[c.i][c.j] == "S" || grid[c.i][c.j] == "-" || grid[c.i][c.j] == "J" || grid[c.i][c.j] == "7") &&
+          (grid[c.i][c.j-1] == "-" || grid[c.i][c.j-1] == "L" || grid[c.i][c.j-1] == "F") &&
+          !isVisited(visited, c.i, c.j-1)) {
+        next = { i: c.i, j: c.j-1};
+        addToVisited(visited, c.i, c.j-1);
+        maybeAdd(grid, { i: next.i+1, j: next.j }, left);
+        maybeAdd(grid, { i: next.i-1, j: next.j }, right);
+        if (grid[next.i][next.j] == "F") {
+          maybeAdd(grid, { i: next.i, j: next.j-1 }, right);
+          maybeAdd(grid, { i: next.i+1, j: next.j-1 }, right);
+        }
+        if (grid[next.i][next.j] == "L") {
+          maybeAdd(grid, { i: next.i+1, j: next.j-1 }, left);
+          maybeAdd(grid, { i: next.i, j: next.j-1 }, left);
+        }
+      } else if (c.j < grid[c.i].length - 1 &&
+          (grid[c.i][c.j] == "S" || grid[c.i][c.j] == "-" || grid[c.i][c.j] == "L" || grid[c.i][c.j] == "F") &&
+          (grid[c.i][c.j+1] == "-" || grid[c.i][c.j+1] == "J" || grid[c.i][c.j+1] == "7") &&
+          !isVisited(visited, c.i, c.j+1)) {
+        next = { i: c.i, j: c.j+1};
+        addToVisited(visited, c.i, c.j+1);
+        maybeAdd(grid, { i: next.i-1, j: next.j }, left);
+        maybeAdd(grid, { i: next.i+1, j: next.j }, right);
+        if (grid[next.i][next.j] == "J") {
+          maybeAdd(grid, { i: next.i, j: next.j+1 }, right);
+          maybeAdd(grid, { i: next.i+1, j: next.j+1 }, right);
+        }
+        if (grid[next.i][next.j] == "7") {
+          maybeAdd(grid, { i: next.i-1, j: next.j+1 }, left);
+          maybeAdd(grid, { i: next.i, j: next.j+1 }, left);
+        }
+      } else if (c.i < grid.length - 1 &&
+          (grid[c.i][c.j] == "S" || grid[c.i][c.j] == "|" || grid[c.i][c.j] == "7" || grid[c.i][c.j] == "F") &&
+          (grid[c.i+1][c.j] == "|" || grid[c.i+1][c.j] == "L" || grid[c.i+1][c.j] == "J") &&
+          !isVisited(visited, c.i+1, c.j)) {
+        next = { i: c.i+1, j: c.j};
+        addToVisited(visited, c.i+1, c.j);
+        maybeAdd(grid, { i: next.i, j: next.j+1 }, left);
+        maybeAdd(grid, { i: next.i, j: next.j-1 }, right);
+        if (grid[next.i][next.j] == "L") {
+          maybeAdd(grid, { i: next.i+1, j: next.j }, right);
+          maybeAdd(grid, { i: next.i+1, j: next.j-1 }, right);
+        }
+        if (grid[next.i][next.j] == "J") {
+          maybeAdd(grid, { i: next.i+1, j: next.j }, left);
+          maybeAdd(grid, { i: next.i+1, j: next.j+1 }, left);
+        }
+      }
+    c = next;
+  }
+  for (let l of left) {
+    if (visited.has(l))
+      left.delete(l);
+  }
+  for (let r of right) {
+    if (visited.has(r))
+      right.delete(r);
+  }
+  left = flood(grid, left, visited);
+  right = flood(grid, right, visited);
+  return Math.min(left.size, right.size);
+}
+
+</script>
+</body>
