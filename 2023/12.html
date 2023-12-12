@@ -1,0 +1,78 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+let cache = new Map();
+
+function countArrangements(springs, actual) {
+  if (actual.length == 0) {
+    for (let i = 0; i < springs.length; i++) {
+      if (springs.charAt(i) == "#") return 0;
+    }
+    return 1;
+  }
+  if (springs.length == 0)
+    return 0;
+  let cached = cache.get(JSON.stringify({ springs, actual }));
+  if (cached != undefined) {
+    return cached;
+  }
+
+  let nextLength = actual[0];
+  let canStartHere = nextLength <= springs.length;
+  for (let i = 0; i < nextLength && i < springs.length; i++) {
+    if (springs.charAt(i) == ".") {
+      canStartHere = false;
+      break;
+    }
+  }
+  if (nextLength != springs.length && springs.charAt(nextLength) == "#")
+    canStartHere = false;
+
+  let count = 0;
+  if (canStartHere) {
+    let newSprings = springs.substring(nextLength + 1);
+    let newActual = structuredClone(actual);
+    newActual.shift();
+    count += countArrangements(newSprings, newActual);
+  }
+
+  if (springs.charAt(0) != "#") {
+    let newSprings = springs.substring(1);
+    let newActual = actual;
+    count += countArrangements(newSprings, newActual);
+  }
+
+  cache.set(JSON.stringify({ springs, actual }), count);
+
+  return count;
+}
+
+function part1(inputs) {
+  let result = 0;
+  for (let i of inputs) {
+    let s = i.split(" ");
+    let actual = s[1].split(",").map(x => parseInt(x));
+    let springs = s[0];
+    result += countArrangements(springs, actual);
+  }
+  return result;
+}
+
+function part2(inputs) {
+  let result = 0;
+  for (let i of inputs) {
+    let s = i.split(" ");
+    let actualBase = s[1].split(",").map(x => parseInt(x));
+    let actual = actualBase;
+    let springs = s[0];
+    for (let a = 0; a < 4; a++) {
+      springs += "?" + s[0];
+      actual = actual.concat(actualBase);
+    }
+    result += countArrangements(springs, actual);
+  }
+  return result;
+}
+
+</script>
+</body>
