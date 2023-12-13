@@ -1,0 +1,124 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let patterns = [];
+  let currentPattern = [];
+  for (let i of inputs) {
+    if (i.length == 0) {
+      patterns.push(currentPattern);
+      currentPattern = [];
+      continue;
+    }
+    currentPattern.push(i.split(""));
+  }
+  patterns.push(currentPattern);
+  return patterns;
+}
+
+function findMirror(pattern) {
+  for (let i = 0; i < pattern.length - 1; i++) {
+    let match = true;
+    let up = i;
+    let down = i+1;
+    while (up >= 0 && down < pattern.length) {
+      for (let j = 0; j < pattern[up].length; j++) {
+        if (pattern[up][j] != pattern[down][j]) {
+          match = false;
+          break;
+        }
+      }
+      if (!match)
+        break;
+      up--
+      down++;
+    }
+    if (match) {
+      return (i+1) * 100;
+    }
+  }
+
+  for (let j = 0; j < pattern[0].length - 1; j++) {
+    let match = true;
+    let left = j;
+    let right = j+1;
+    while (left >= 0 && right < pattern[0].length) {
+      for (let i = 0; i < pattern.length; i++) {
+        if (pattern[i][left] != pattern[i][right]) {
+          match = false;
+          break;
+        }
+      }
+      if (!match)
+        break;
+      left--
+      right++;
+    }
+    if (match) {
+      return j+1;
+    }
+  }
+  return 0;
+}
+
+function findMirrorPart2(pattern) {
+  for (let i = 0; i < pattern.length - 1; i++) {
+    let mismatches = 0;
+    let up = i;
+    let down = i+1;
+    while (up >= 0 && down < pattern.length) {
+      for (let j = 0; j < pattern[up].length; j++) {
+        if (pattern[up][j] != pattern[down][j]) {
+          mismatches++;
+        }
+      }
+      if (mismatches > 1)
+        break;
+      up--
+      down++;
+    }
+    if (mismatches == 1) {
+      return (i+1) * 100;
+    }
+  }
+
+  for (let j = 0; j < pattern[0].length - 1; j++) {
+    let mismatches = 0;
+    let left = j;
+    let right = j+1;
+    while (left >= 0 && right < pattern[0].length) {
+      for (let i = 0; i < pattern.length; i++) {
+        if (pattern[i][left] != pattern[i][right]) {
+          mismatches++;
+        }
+      }
+      if (mismatches > 1)
+        break;
+      left--
+      right++;
+    }
+    if (mismatches == 1) {
+      return j+1;
+    }
+  }
+  return 0;
+}
+
+function part1(patterns) {
+  let result = 0;
+  for (let p of patterns) {
+    result += findMirror(p);
+  }
+  return result;
+}
+
+function part2(patterns) {
+  let result = 0;
+  for (let p of patterns) {
+    result += findMirrorPart2(p);
+  }
+  return result;
+}
+
+</script>
+</body>
