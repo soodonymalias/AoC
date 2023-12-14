@@ -1,8 +1,8 @@
 <body>
 <script src="/helpers/runner.js"></script>
+<script src="/helpers/arrays.js"></script>
 <script>
-function part1(inputs) {
-  let grid = toGrid(inputs, "", "");
+function tilt(grid) {
   for (let i = 0; i < grid.length; i++) {
     for (let j = 0; j < grid[i].length; j++) {
       if (grid[i][j] !=  "O") continue;
@@ -17,6 +17,9 @@ function part1(inputs) {
       }
     }
   }
+}
+
+function calcWeight(grid) {
   let result = 0;
   for (let j = 0; j < grid[0].length; j++) {
     for (let i = 0; i < grid.length; i++) {
@@ -27,62 +30,20 @@ function part1(inputs) {
   return result;
 }
 
+function part1(inputs) {
+  let grid = toGrid(inputs, "", "");
+  tilt(grid);
+  return calcWeight(grid);
+}
+
 function part2(inputs) {
   let grid = toGrid(inputs, "", "");
   let cache = new Map();
   for (let a = 1000000000; a > 0; a--) {
-    for (let i = 0; i < grid.length; i++) {
-      for (let j = 0; j < grid[i].length; j++) {
-        if (grid[i][j] !=  "O") continue;
-        let x = i;
-        while (x > 0) {
-          if (grid[x-1][j] != ".") 
-            break;
-          grid[x-1][j] = "O";
-          grid[x][j] = ".";
-          x--;
-        }
-      }
+    for (let b = 0; b < 4; b++) {
+      tilt(grid);
+      grid = rotateClockwise(grid);
     }
-    for (let j = 0; j < grid[0].length; j++) {
-      for (let i = 0; i < grid.length; i++) {
-        if (grid[i][j] != "O") continue;
-        let y = j;
-        while (y > 0) {
-          if (grid[i][y-1] != ".")
-            break;
-          grid[i][y-1] = "O";
-          grid[i][y] = ".";
-          y--;
-        }
-      }
-    }
-    for (let i = grid.length - 1; i >= 0; i--) {
-      for (let j = 0; j < grid[i].length; j++) {
-        if (grid[i][j] !=  "O") continue;
-        let x = i;
-        while (x < grid.length - 1) {
-          if (grid[x+1][j] != ".")
-            break;
-          grid[x+1][j] = "O";
-          grid[x][j] = ".";
-          x++;
-        }
-      }
-    }
-    for (let j = grid[0].length - 1; j >= 0; j--) {
-      for (let i = 0; i < grid.length; i++) {
-        if (grid[i][j] != "O") continue;
-        let y = j;
-        while (y < grid[0].length - 1) {
-          if (grid[i][y+1] != ".")
-            break;
-          grid[i][y+1] = "O";
-          grid[i][y] = ".";
-          y++;
-        }
-      }
-    } 
     let c = JSON.stringify(grid);
     if (cache.has(c)) {
       let cycleLength = cache.get(c) - a;
@@ -92,14 +53,7 @@ function part2(inputs) {
       cache.set(c, a);
     }
   }
-  let result = 0;
-  for (let j = 0; j < grid[0].length; j++) {
-    for (let i = 0; i < grid.length; i++) {
-      if (grid[i][j] == "O")
-        result += grid.length - i;
-    }
-  }
-  return result;
+  return calcWeight(grid);
 }
 
 </script>
