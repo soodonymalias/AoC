@@ -1,0 +1,67 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  return inputs[0].split(",");
+}
+
+function hash(s) {
+  let hash = 0;  
+  for (let i = 0; i < s.length; i++) {
+    hash += s.charCodeAt(i);
+    hash *= 17;
+    hash %= 256;
+  }
+  return hash;
+}
+
+function part1(strings) {
+  let result = 0;
+  for (let s of strings) {
+    result += hash(s);
+  }
+  return result;
+}
+
+function part2(strings) {
+  let boxes = new Array(256);
+  for (let i = 0; i < 256; i++)
+    boxes[i] = [];
+
+  for (let s of strings) {
+    if (s.includes("-")) {
+      let label = s.split("-")[0];
+      let h = hash(label);
+      for (let i = 0; i < boxes[h].length; i++) {
+        if (boxes[h][i].label == label) {
+          boxes[h].splice(i, 1);
+          break;
+        }
+      }
+    } else {
+      let label = s.split("=")[0];
+      let h = hash(label);
+      let value = parseInt(s.split("=")[1]);
+      let found = false;
+      for (let i = 0; i < boxes[h].length; i++) {
+        if (boxes[h][i].label == label) {
+          boxes[h][i].value = value;
+          found = true;
+          break;
+        }
+      }
+      if (!found)
+        boxes[h].push({ label, value });
+    }
+  }
+
+  let result = 0;
+  for (let i = 0; i < boxes.length; i++) {
+    for (let j = 0; j < boxes[i].length; j++) {
+      result += (i+1) * (j+1) * boxes[i][j].value;
+    }
+  }
+  return result;
+}
+</script>
+</body>
