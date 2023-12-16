@@ -1,0 +1,112 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  return toGrid(inputs, "", "");
+}
+
+const offsets = new Map();
+offsets.set("n", { i: -1, j: 0 });
+offsets.set("s", { i: 1, j: 0 });
+offsets.set("e", { i: 0, j: 1 });
+offsets.set("w", { i: 0, j: -1 });
+
+function pushNext(nextBeams, grid, i, j, dir) {
+  let offset = offsets.get(dir);
+  let nI = i + offset.i;
+  let nJ = j + offset.j;
+  if (nI < 0 || nJ < 0 || nI >= grid.length || nJ >= grid[nI].length)
+    return;
+  nextBeams.push({ i: nI, j: nJ, dir });
+}
+
+function light(grid, startI, startJ, startDir) {
+  let lit = new Array(grid.length);
+  for (let i = 0; i < grid.length; i++) {
+    lit[i] = new Array(grid[i].length);
+    lit[i].fill(false);
+  }
+
+  let cache = new Set();
+  let beams = [{i: startI, j: startJ, dir: startDir}];
+
+  while (beams.length > 0) {
+    let nextBeams = [];
+    for (let b of beams) {
+      let sB = JSON.stringify(b);
+      if (cache.has(sB))
+        continue;
+      cache.add(sB);
+
+      lit[b.i][b.j] = true;
+      let nDir = b.dir;
+      if (grid[b.i][b.j] == "/") {
+        if (nDir == "n") nDir = "e";
+        else if (nDir == "e") nDir = "n";
+        else if (nDir == "w") nDir = "s";
+        else if (nDir == "s") nDir = "w";
+      } else if (grid[b.i][b.j] == "\\") {
+        if (nDir == "n") nDir = "w";
+        else if (nDir == "w") nDir = "n";
+        else if (nDir == "e") nDir = "s";
+        else if (nDir == "s") nDir = "e";
+      } else if (grid[b.i][b.j] == "-") {
+        if (nDir == "n" || nDir == "s") {
+          pushNext(nextBeams, grid, b.i, b.j, "e");
+          pushNext(nextBeams, grid, b.i, b.j, "w");
+          continue;
+        }
+      } else if (grid[b.i][b.j] == "|") {
+        if (nDir == "e" || nDir == "w") {
+          pushNext(nextBeams, grid, b.i, b.j, "n");
+          pushNext(nextBeams, grid, b.i, b.j, "s");
+          continue;
+        }
+      }
+      pushNext(nextBeams, grid, b.i, b.j, nDir);
+    }
+    beams = nextBeams;
+  }
+  let litCount = 0;
+  for (let i = 0; i < lit.length; i++) {
+    for (let j = 0; j < lit[i].length; j++) {
+      if (lit[i][j]) litCount++;
+    }
+  }
+  return litCount;
+}
+
+function litToSet(lit) {
+  let set = new Set();
+  for (let i = 0; i < lit.length; i++) {
+    for (let j = 0; j < lit[i].length; j++) {
+      if (lit[i][j])
+        set.add((i*lit.length) + j);
+    }
+  }
+  return set;
+}
+
+function part1(grid) {
+  return light(grid, 0, 0, "e");
+}
+
+function part2(grid) {
+  let max = 0;
+  for (let i = 0; i < grid.length; i++) {
+    max = Math.max(max, light(grid, i, 0, "e"));
+  }
+  for (let i = 0; i < grid.length; i++) {
+    max = Math.max(max, light(grid, i, grid.length - 1, "w"));
+  }
+  for (let j = 0; j < grid.length; j++) {
+    max = Math.max(max, light(grid, 0, j, "s"));
+  }
+  for (let j = 0; j < grid.length; j++) {
+    max = Math.max(max, light(grid, grid.length - 1, j, "n"));
+  }
+  return max;
+}
+
+</script>
+</body>
