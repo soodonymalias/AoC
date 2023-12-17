@@ -1,0 +1,69 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  return toGrid(inputs, "", "parseInt");
+}
+
+const offsets = new Map();
+offsets.set("n", { i: -1, j: 0 });
+offsets.set("s", { i: 1, j: 0 });
+offsets.set("e", { i: 0, j: 1 });
+offsets.set("w", { i: 0, j: -1 });
+
+function go(grid, minWalk, maxWalk) {
+  let locs = [{i:0, j:0, dir: "e", loss: 0 },
+              {i:0, j:0, dir: "s", loss: 0 }];
+  let cache = new Map();
+  let min = Number.MAX_SAFE_INTEGER;
+  while (locs.length > 0) {
+    let newLocs = []
+    for (let l of locs) {
+      if (l.loss >= min)
+        continue;
+      if (l.i == grid.length -1 && l.j == grid.length - 1) {
+        min = Math.min(min, l.loss);
+        continue;
+      }
+
+      let s = l.i + "," + l.j + "," + l.dir;
+      if (cache.has(s)) {
+        if (cache.get(s) <= l.loss)
+          continue;
+      }
+      cache.set(s, l.loss);
+
+      let offset = offsets.get(l.dir);
+      let newDirs;
+      if (l.dir == "e" || l.dir == "w")
+        newDirs = ["n", "s"];
+      else
+        newDirs = ["e", "w"];
+      let newLoss = l.loss;
+      for (let x = 1; x <= maxWalk; x++) {
+        let nI = l.i + (offset.i * x);
+        let nJ = l.j + (offset.j * x);
+        if (nI < 0 || nJ < 0 || nI >= grid.length || nJ >= grid.length)
+          break;
+        newLoss += grid[nI][nJ];
+        if (x < minWalk) continue;
+        for (let n of newDirs) {
+          newLocs.push({ i: nI, j: nJ, dir: n, loss: newLoss });
+        }
+      }
+    }
+    locs = newLocs;
+  }
+  return min;
+}
+
+function part1(grid) {
+  return go(grid, 1, 3);
+}
+
+function part2(grid) {
+  return go(grid, 4, 10);
+}
+
+</script>
+</body>
