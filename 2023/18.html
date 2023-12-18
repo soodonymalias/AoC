@@ -1,0 +1,61 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let instructions = []
+  for (let i of inputs) {
+    let s = i.split(" ");
+    instructions.push({ dir: s[0], length: parseInt(s[1]), color: s[2].substring(2, 8) });
+  }
+  return instructions;
+}
+
+const offsets = new Map();
+offsets.set("U", { i: -1, j: 0 });
+offsets.set("D", { i: 1, j: 0 });
+offsets.set("R", { i: 0, j: 1 });
+offsets.set("L", { i: 0, j: -1 });
+
+function calcArea(instructions) {
+  let currI = 0;
+  let currJ = 0;
+  let perimeter = 0;
+  let points = [];
+  for (let i of instructions) {
+    points.push({ i: currI, j: currJ });
+    let offset = offsets.get(i.dir);
+    currI += offset.i * i.length;
+    currJ += offset.j * i.length;   
+    perimeter += i.length;
+  }
+
+  let area = 0;
+  for (let p = 0; p < points.length; p++) {
+    let o = (p+1) % points.length;
+    area += points[p].i * points[o].j;
+    area -= points[o].i * points[p].j;
+  }
+  return (Math.abs(area) + perimeter  + 2) / 2;
+}
+
+function part1(instructions) {
+  return calcArea(instructions);
+}
+
+function part2(instructions) {
+  for (let i of instructions) {
+    i.length = parseInt(i.color.substring(0, 5), 16);
+    if (i.color[5] == 0)
+      i.dir = "R";
+    if (i.color[5] == 1)
+      i.dir = "D";
+    if (i.color[5] == 2)
+      i.dir = "L";
+    if (i.color[5] == 3)
+      i.dir = "U";
+  }
+  return calcArea(instructions);
+}
+
+</script>
+</body>
