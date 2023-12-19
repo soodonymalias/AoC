@@ -1,0 +1,136 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let rules = new Map();
+  let parts = [];
+  let processing_rules = true;
+  for (let i of inputs) {
+    if (i.length == 0) {
+      processing_rules = false;
+      continue;
+    }
+    if (processing_rules) {
+      let s0 = i.split("{");
+      let name = s0[0];
+      let steps = s0[1].split("}")[0].split(",");
+
+      let r = []
+      for (let s of steps) {
+        let rS = s.split(":");
+        if (rS.length > 1) {
+          r.push({ check: rS[0].charAt(0), compare: rS[0].charAt(1), val: parseInt(rS[0].substring(2)), dest: rS[1] });
+        } else {
+          r.push({ dest: rS[0] });
+        }
+      }
+      rules.set(name, r);
+    } else {
+      let pS = i.substring(1, i.length - 1).split(",");
+      let part = {};
+      for (let p of pS) {
+        part[p[0]] = parseInt(p.substring(2));
+      }
+      parts.push(part);
+    }
+  }
+  return { rules, parts };
+}
+
+function part1(input) {
+  let rules = input.rules;
+  let parts = input.parts;
+
+  let sum = 0;
+  for (let p of parts) {
+    let accept;
+    let currentRule = "in";
+    while (true) {
+      let cR = rules.get(currentRule);
+      for (let r of cR) {
+        if (r.compare == undefined) {
+          if (r.dest == "A") {
+            accept = true;
+          } else if (r.dest == "R") {
+            accept = false;
+          } else {
+            currentRule = r.dest;
+          }
+          break;
+        }
+        if ((r.compare == ">" && p[r.check] > r.val) ||
+            (r.compare == "<" && p[r.check] < r.val)) {
+          if (r.dest == "A") {
+            accept = true;
+          } else if (r.dest == "R") {
+            accept = false;
+          } else {
+            currentRule = r.dest;
+          }
+          break;
+        }
+      }
+      if (accept == undefined)
+        continue;
+      if (accept) {
+        sum += (p.x + p.m + p.a + p.s);
+      }
+      break;
+    }
+  }
+  return sum;
+}
+
+function rangesSize(ranges) {
+  let retVal = 1;
+  for (let prop of ["x", "m", "a", "s"]) {
+    retVal *= (ranges[prop][1] + 1 - ranges[prop][0])
+  }
+  return retVal;
+}
+
+function getValues(rules, currentRule, ranges) {
+  let rule = rules.get(currentRule);
+  let remainderRanges = structuredClone(ranges);
+  let retVal = 0;
+  for (let r of rule) {
+    let newRanges = structuredClone(remainderRanges);
+    if (r.compare == undefined) {
+      if (r.dest == "R")
+        continue;
+      if (r.dest == "A") {
+        retVal += rangesSize(remainderRanges);
+        continue;
+      }
+      retVal += getValues(rules, r.dest, remainderRanges);
+    } else if (r.compare == ">") {
+      newRanges[r.check][0] = r.val + 1;
+      remainderRanges[r.check][1] = r.val;
+      if (r.dest == "R")
+        continue;
+      if (r.dest == "A") {
+        retVal += rangesSize(newRanges);
+        continue;
+      }
+      retVal += getValues(rules, r.dest, newRanges); 
+    } else if (r.compare == "<") {
+      newRanges[r.check][1] = r.val - 1;
+      remainderRanges[r.check][0] = r.val;
+      if (r.dest == "R")
+        continue;
+      if (r.dest == "A") {
+        retVal += rangesSize(newRanges);
+        continue;
+      }
+      retVal += getValues(rules, r.dest, newRanges); 
+    }
+  }
+  return retVal;
+}
+
+function part2(input) {
+  return getValues(input.rules, "in", { x: [1, 4000], m: [1, 4000], a: [1, 4000], s: [1, 4000] });
+}
+
+</script>
+</body>
