@@ -25,7 +25,7 @@ function preprocessInput(inputs) {
   for (let m of modules.values()) {
     for (let d of m.dests) {
       if (modules.get(d) == undefined) {
-        modules.set(d, {dests: []});
+        modules.set(d, {type: "o", dests: []});
       } else if (modules.get(d).type == "c") {
         modules.get(d).remember.set(m.name, false);
       }
@@ -34,60 +34,20 @@ function preprocessInput(inputs) {
   return modules;
 }
 
-function part1(modulesIn) {
-  let modules = structuredClone(modulesIn);
+function press(modules, optionalObserver) {
   let high = 0;
   let low = 0;
-  for (let i = 0; i < 1000; i++) {
-    let toProcess = [{name: "broadcaster", high: false, src: "button" }]
-    while (toProcess.length > 0) {
-      //let next = [];
-      //for (let t of toProcess) {
-        let t = toProcess.shift();
-        if (t.high)
-          high++;
-        else
-          low++;
 
-        let m = modules.get(t.name);
-        if (m.type == "b") {
-          for (let d of m.dests) {
-            toProcess.push({ name: d, high: t.high, src: m.name });
-          }
-        } else if (m.type == "f") {
-          if (t.high)
-            continue;
-          for (let d of m.dests) {
-            toProcess.push({ name: d, high: !m.on, src: m.name });
-          }
-          m.on = !m.on;
-        } else if (m.type == "c") {
-          m.remember.set(t.src, t.high);
-          let allHigh = true;
-          for (let v of m.remember.values()) {
-            if (!v) {
-              allHigh = false;
-              break;
-            }
-          }
-          for (let d of m.dests) {
-            toProcess.push({ name: d, high: !allHigh, src: m.name });
-          }
-        }
-    }
-  }
-  return high * low;
-}
-
-function press(modules) {
-  let rxLowCount = 0;
   let toProcess = [{name: "broadcaster", high: false, src: "button" }]
   while (toProcess.length > 0) {
     let t = toProcess.shift();
-    if (t.name == "kz") {
-      if (!t.high)
-        rxLowCount++;
-    }
+    if (t.high)
+      high++;
+    else
+      low++;
+
+    if (optionalObserver)
+      optionalObserver(t);
 
     let m = modules.get(t.name);
     if (m.type == "b") {
@@ -115,31 +75,55 @@ function press(modules) {
       }
     }
   }
-  return rxLowCount;
+  return {high, low};
+}
+
+function part1(modulesIn) {
+  let modules = structuredClone(modulesIn);
+  let high = 0;
+  let low = 0;
+  for (let i = 0; i < 1000; i++) {
+    result = press(modules);
+    high += result.high;
+    low += result.low
+  }
+  return high * low;
 }
 
 function part2(modulesIn) {
   if (window.is_test) return;
   let modules = structuredClone(modulesIn);
-  let result = 0;
-  while (true) {
-    result++;
-    let p = press(modules);
-    if (p == 1)
-      console.log(result);
-    let on = []
-    for (let m of modules.values()) {
-      if (m.on == true)
-        on.push(m.name);
+
+  let final_conjunction;
+  for (let m of modules.values()) {
+    for (let d of m.dests) {
+      if (modules.get(d).type == "o") {
+        final_conjunction = m;
+        break;
+      }
     }
-    if (on.length == 0)
-      break;
+  }
+
+  let step = 0;
+  let result = 1;
+  let final_conjection_inputs_still_needed = new Set(final_conjunction.remember.keys());
+  function observer(t) {
+    if (t.name != final_conjunction.name)
+      return;
+    if (!t.high)
+      return;
+    if (!final_conjection_inputs_still_needed.has(t.src))
+      return;
+    final_conjection_inputs_still_needed.delete(t.src);
+    result *= step;
+  }
+
+  while (true) {
+    step++;
+    press(modules, observer);
+    if (final_conjection_inputs_still_needed.size == 0) break;
   }
   return result;
-  // I manually hacked my input so that only one branch was present,
-  // then used the above logic to extract the cycle length of each
-  // of the 4 branches.
-  // return 3911 * 4093 * 3733 * 4019;
 }
 
 </script>
