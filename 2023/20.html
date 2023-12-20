@@ -1,0 +1,146 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let modules = new Map();
+  for (let i of inputs) {
+    let s = i.split(" -> ");
+    let m = {};
+    if (s[0] == "broadcaster") {
+      m.type = "b"
+      m.name = "broadcaster"
+    } else if (s[0].charAt(0) == "%") {
+      m.type = "f"
+      m.on = false;
+      m.name = s[0].substring(1);
+    } else if (s[0].charAt(0) == "&") {
+      m.type = "c"
+      m.remember = new Map();
+      m.name = s[0].substring(1);
+    }
+    m.dests = s[1].split(", ");
+    modules.set(m.name, m);
+  }
+
+  for (let m of modules.values()) {
+    for (let d of m.dests) {
+      if (modules.get(d) == undefined) {
+        modules.set(d, {dests: []});
+      } else if (modules.get(d).type == "c") {
+        modules.get(d).remember.set(m.name, false);
+      }
+    }
+  }
+  return modules;
+}
+
+function part1(modulesIn) {
+  let modules = structuredClone(modulesIn);
+  let high = 0;
+  let low = 0;
+  for (let i = 0; i < 1000; i++) {
+    let toProcess = [{name: "broadcaster", high: false, src: "button" }]
+    while (toProcess.length > 0) {
+      //let next = [];
+      //for (let t of toProcess) {
+        let t = toProcess.shift();
+        if (t.high)
+          high++;
+        else
+          low++;
+
+        let m = modules.get(t.name);
+        if (m.type == "b") {
+          for (let d of m.dests) {
+            toProcess.push({ name: d, high: t.high, src: m.name });
+          }
+        } else if (m.type == "f") {
+          if (t.high)
+            continue;
+          for (let d of m.dests) {
+            toProcess.push({ name: d, high: !m.on, src: m.name });
+          }
+          m.on = !m.on;
+        } else if (m.type == "c") {
+          m.remember.set(t.src, t.high);
+          let allHigh = true;
+          for (let v of m.remember.values()) {
+            if (!v) {
+              allHigh = false;
+              break;
+            }
+          }
+          for (let d of m.dests) {
+            toProcess.push({ name: d, high: !allHigh, src: m.name });
+          }
+        }
+    }
+  }
+  return high * low;
+}
+
+function press(modules) {
+  let rxLowCount = 0;
+  let toProcess = [{name: "broadcaster", high: false, src: "button" }]
+  while (toProcess.length > 0) {
+    let t = toProcess.shift();
+    if (t.name == "kz") {
+      if (!t.high)
+        rxLowCount++;
+    }
+
+    let m = modules.get(t.name);
+    if (m.type == "b") {
+      for (let d of m.dests) {
+        toProcess.push({ name: d, high: t.high, src: m.name });
+      }
+    } else if (m.type == "f") {
+      if (t.high)
+        continue;
+      for (let d of m.dests) {
+        toProcess.push({ name: d, high: !m.on, src: m.name });
+      }
+      m.on = !m.on;
+    } else if (m.type == "c") {
+      m.remember.set(t.src, t.high);
+      let allHigh = true;
+      for (let v of m.remember.values()) {
+        if (!v) {
+          allHigh = false;
+          break;
+        }
+      }
+      for (let d of m.dests) {
+        toProcess.push({ name: d, high: !allHigh, src: m.name });
+      }
+    }
+  }
+  return rxLowCount;
+}
+
+function part2(modulesIn) {
+  if (window.is_test) return;
+  let modules = structuredClone(modulesIn);
+  let result = 0;
+  while (true) {
+    result++;
+    let p = press(modules);
+    if (p == 1)
+      console.log(result);
+    let on = []
+    for (let m of modules.values()) {
+      if (m.on == true)
+        on.push(m.name);
+    }
+    if (on.length == 0)
+      break;
+  }
+  return result;
+  // I manually hacked my input so that only one branch was present,
+  // then used the above logic to extract the cycle length of each
+  // of the 4 branches.
+  // return 3911 * 4093 * 3733 * 4019;
+}
+
+</script>
+</body>
