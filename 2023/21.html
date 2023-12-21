@@ -1,0 +1,99 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  return toGrid(inputs, "", "");
+}
+
+function go(grid, steps) {
+  let locs = [];
+  for (let i = 0 ; i < grid.length; i++) {
+    for (let j = 0; j < grid[i].length; j++) {
+      if (grid[i][j] == "S")
+        locs.push({i, j});
+    }
+  }
+
+  const offsets = [[1,0], [-1,0], [0,1], [0,-1]];
+  for (let s = 0; s < steps; s++) {
+    let newLocs = new Set();
+    for (let l of locs) {
+      for (let o of offsets) {
+        let nI = l.i + o[0];
+        let nJ = l.j + o[1];
+        if (nI < 0 || nJ < 0 || nI >= grid.length || nJ >= grid[nI].length)
+          continue;
+        if (grid[nI][nJ] == "#")
+          continue;
+        newLocs.add(nI + "," + nJ);
+      }
+    }
+    locs = [];
+    
+    for (let n of newLocs) {
+      let s = n.split(",");
+      locs.push({ i: parseInt(s[0]), j: parseInt(s[1]) })
+    }
+  }
+  return locs;
+}
+
+function part1(grid) {
+  let steps = window.is_test ? 6 : 64;
+  return go(grid, steps).length;
+}
+
+function part2(grid) {
+  if (window.is_test) return;
+  const offsets = [[1,0], [-1,0], [0,1], [0,-1]];
+
+  let bigGrid = new Array(grid.length*5);
+  for (let i = 0; i < grid.length*5; i++) {
+    bigGrid[i] = new Array(grid.length*5);
+    for (let j = 0; j < grid.length*5; j++) {
+      let val = grid[i % grid.length][j % grid.length];
+      if (val == "S") {
+        if (Math.floor(i / grid.length) == 2 && Math.floor(j / grid.length) == 2)
+          bigGrid[i][j] = "S";
+        else
+          bigGrid[i][j] = ".";
+      } else {
+        bigGrid[i][j] = val;
+      }
+    }
+  }
+  let locs = go(bigGrid, (2*131) + 65);
+  let results = new Array(5);
+  for (let i = 0; i < 5; i++) {
+    results[i] = new Array(5).fill(0);
+  }
+  for (let l of locs) {
+    let rI = Math.floor(l.i / grid.length);
+    let rJ = Math.floor(l.j / grid.length);
+    results[rI][rJ] += 1;
+  }
+
+  let n = Math.floor(26501365 / grid.length);
+  let result = 0;
+  result += n*results[0][1];
+  result += n*results[0][3];
+  result += n*results[4][1];
+  result += n*results[4][3];
+
+  result += results[0][2];
+  result += results[4][2];
+  result += results[2][0];
+  result += results[2][4];
+
+  result += results[1][1]*(n-1);
+  result += results[1][3]*(n-1);
+  result += results[3][1]*(n-1);
+  result += results[3][3]*(n-1);
+
+  result += results[2][1] * n * n;
+  result += results[2][2] * (n-1) * (n-1);
+  return result;
+}
+
+</script>
+</body>
