@@ -1,0 +1,180 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  return toGrid(inputs, "", "");
+}
+
+const offsets = [[0,1], [0,-1], [1,0], [-1,0]];
+
+function walk(grid, i, j, steps) {
+  if (i == grid.length - 1)
+    return steps;
+
+  let valBefore = grid[i][j];
+  grid[i][j] = "O";
+  let max = 0;
+  let dirs = [];
+  for (let o = 0; o < offsets.length; o++) {
+    let x = i + offsets[o][0];
+    let y = j + offsets[o][1];
+    if (x < 0 || y < 0 || x >= grid.length || y >= grid.length)
+      continue;
+    if (grid[x][y] == "#")
+      continue;
+    if (grid[x][y] == "O")
+      continue;
+    if (grid[x][y] != ".") {
+      if (o == 0 && grid[x][y] != ">")
+        continue;
+      if (o == 1 && grid[x][y] != "<")
+        continue;
+      if (o == 2 && grid[x][y] != "v")
+        continue;
+      if (o == 3 && grid[x][y] != "^")
+        continue;
+    }
+    max = Math.max(walk(grid, x, y, steps+1), max);
+  }
+  grid[i][j] = valBefore;
+  return max;
+}
+
+function part1(grid) {
+  let startY = 0;
+  for (; startY < grid.length; startY++) {
+    if (grid[0][startY] == ".")
+      break;
+  }
+
+  return walk(grid, 0, startY, 0);
+}
+
+/*function part2(grid) {
+  let startY = 0;
+  for (; startY < grid.length; startY++) {
+    if (grid[0][startY] == ".")
+      break;
+  }
+
+  let stack = [{ i:0, j: startY, steps: 0, g: grid}]
+  let max = 0;
+  let count = 0;
+  while (stack.length > 0) {
+    count++;
+    if (count % 1000 == 0) console.log(stack.length);
+    let s = stack.pop();
+    let i = s.i;
+    let j = s.j;
+    let steps = s.steps;
+    if (i == grid.length - 1) {
+      max = Math.max(max, steps);
+      continue;
+    }
+
+    let g = structuredClone(s.g);
+    g[i][j] = "O";
+    let dirs = [];
+     for (let o = 0; o < offsets.length; o++) {
+      let x = i + offsets[o][0];
+      let y = j + offsets[o][1];
+      if (x < 0 || y < 0 || x >= g.length || y >= g.length)
+        continue;
+      if (g[x][y] == "#")
+        continue;
+      if (g[x][y] == "O")
+        continue;
+      let newState = { i: x, j: y, steps: steps+1, g };
+      stack.push(newState);
+    }
+  }
+  return max;
+}*/
+
+function walkPart2(current, visited, steps) {
+  if (current.last)
+    return steps;
+  visited.add(current);
+
+  let max = 0;
+  for (let v of current.neighbors) {
+    if (visited.has(v))
+      continue;
+    max = Math.max(max, walkPart2(v, visited, steps + v.dist));
+  }
+  visited.delete(current);
+  return max;
+}
+
+
+function part2(grid) {
+  if (!window.is_test) return;
+  let startY = 0;
+  for (; startY < grid.length; startY++) {
+    if (grid[0][startY] == ".")
+      break;
+  }
+
+  let firstV = { dist: 0, neighbors: new Set(), last: false };
+  let vs = new Set();
+  vs.add(firstV);
+
+  let toVisit = [{i: 0, j: startY, current: firstV }];
+  let visited = new Set();
+  visited.add(0 + "," + startY);
+  while (toVisit.length > 0) {
+    let t = toVisit.pop();
+    if (t.i == grid.length - 1)
+      t.current.last = true;
+ 
+    let neighbors = [];
+    for (let o of offsets) {
+      let i = t.i + o[0];
+      let j = t.j + o[1];
+      if (i < 0 || j < 0 || i >= grid.length || j >= grid.length)
+        continue;
+      if (grid[i][j] == "#")
+        continue;
+      if (visited.has(i + "," + j)) {
+        continue;
+      }
+      neighbors.push({i, j});
+      visited.add(i + "," + j);
+    }
+
+    if (neighbors.length == 1) {
+      t.current.dist++;
+      toVisit.push({i: neighbors[0].i, j: neighbors[0].j, current : t.current})
+    } else {
+      let newVs = []
+      for (let n of neighbors) {
+        let newV = { dist: 1 , neighbors: new Set(), last: false };
+        newV.neighbors.add(t.current);
+        vs.add(newV);
+        t.current.neighbors.add(newV);
+        for (let nn of newVs) {
+          newV.neighbors.add(nn);
+          nn.neighbors.add(newV);
+        }
+        newVs.push(newV);
+        toVisit.push({i: n.i, j: n.j, current: newV });
+      }
+    }
+  }
+  let removed = new Set();
+  for (let v of vs) {
+    if (v.dist == 1) {
+      removed.add(v);
+      vs.delete(v);
+    }
+  }
+  for (let v of vs) {
+    for (let r of removed)
+      v.neighbors.delete(r);
+  }
+  console.log(vs);
+  return walkPart2(firstV, new Set(), firstV.dist);
+}
+
+</script>
+</body>
