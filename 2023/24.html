@@ -1,0 +1,195 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let hailstones = [];
+  for (let i of inputs) {
+    let s = i.split("@");
+    let ps = s[0].split(",");
+    let vs = s[1].split(",");
+    hailstones.push({ px: parseInt(ps[0].trim()), py: parseInt(ps[1].trim()), pz: parseInt(ps[2].trim()),
+                      vx: parseInt(vs[0].trim()), vy: parseInt(vs[1].trim()), vz: parseInt(vs[2].trim()) });
+  }
+  return hailstones;
+}
+
+function part1(hailstones) {
+  let windowMin = window.is_test ? 7  : 200000000000000;
+  let windowMax = window.is_test ? 27 : 400000000000000;
+
+  let intersections = 0;
+  for (let i = 0; i < hailstones.length; i++) {
+    for (let j = i + 1; j < hailstones.length; j++) {
+      let a = hailstones[i];
+      let b = hailstones[j];
+      let aSlope = a.vy / a.vx;
+      let bSlope = b.vy / b.vx;
+      if (aSlope == bSlope)
+        continue;
+      let bYAtAX = b.py + ((a.px - b.px) * bSlope);
+      let distanceToIntercept = (bYAtAX - a.py) / (aSlope - bSlope);
+      let xIntercept = a.px + distanceToIntercept;
+      let yIntercept = a.py + (aSlope * distanceToIntercept);
+      if ((yIntercept < a.py) != (a.vy < 0))
+        continue;
+      if ((yIntercept < b.py) != (b.vy < 0))
+        continue;
+      if (windowMin <= xIntercept && xIntercept <= windowMax &&
+          windowMin <= yIntercept && yIntercept <= windowMax) {
+        intersections++;
+      }
+    }
+  }
+  return intersections;
+}
+
+function primeFactors(x) {
+  let factors = [];
+  for (let i = 2; i*i < x; i++) {
+    while (x % i == 0) {
+      factors.push(i);
+      x /= i;
+    }
+  }
+  factors.push(x);
+  return factors
+}
+
+function getVelocities(range) {
+  let factors = primeFactors(range);
+  let velocities = [];
+  for (let i = 0; i < Math.pow(2, factors.length); i++) {
+    let v = 1;
+    for (let j = 0; j < factors.length; j++) {
+      if ((i >> j) % 2 == 1)
+        v *= factors[j];
+    }
+    velocities.push(v);
+  }
+  return velocities;
+}
+
+function part2(hailstones) {
+  let xMap = new Map();
+  let yMap = new Map();
+  let zMap = new Map();
+  for (let h of hailstones) {
+    if (!xMap.has(h.vx))
+      xMap.set(h.vx, []);
+    xMap.get(h.vx).push(h);
+    if (!yMap.has(h.vy))
+      yMap.set(h.vy, []);
+    yMap.get(h.vy).push(h);
+    if (!zMap.has(h.vz))
+      zMap.set(h.vz, []);
+    zMap.get(h.vz).push(h);
+  }
+
+  let velocitiesX;
+  let vX;
+  for (let h of xMap.values()) {
+    if (h.length < 2)
+      continue;
+    let done = false;
+    for (let i = 1; i < h.length; i++) {
+      let dist = h[i].px - h[i-1].px;
+      let vs = getVelocities(Math.abs(dist));
+      let relativeVelocities = new Set();
+      for (let v of vs) {
+        relativeVelocities.add(h[i].vx + v);
+        relativeVelocities.add(h[i].vx - v);
+      }
+      if (velocitiesX == undefined) {
+        velocitiesX = relativeVelocities;
+        continue;
+      }
+      for (let vel of velocitiesX) {
+        if (!relativeVelocities.has(vel))
+          velocitiesX.delete(vel);
+      }
+      if (velocitiesX != undefined && velocitiesX.size == 1) {
+        vX = velocitiesX.values().next().value;
+        done = true;
+        break;
+      }
+    }
+    if (done)
+      break;
+  }
+
+  let velocitiesY;
+  let vY;
+  for (let h of yMap.values()) {
+    if (h.length < 2)
+      continue;
+    let done = false;
+    for (let i = 1; i < h.length; i++) {
+      let dist = h[i].py - h[i-1].py;
+      let vs = getVelocities(Math.abs(dist));
+      let relativeVelocities = new Set();
+      for (let v of vs) {
+        relativeVelocities.add(h[i].vy + v);
+        relativeVelocities.add(h[i].vy - v);
+      }
+      if (velocitiesY == undefined) {
+        velocitiesY = relativeVelocities;
+        continue;
+      }
+      for (let vel of velocitiesY) {
+        if (!relativeVelocities.has(vel))
+          velocitiesY.delete(vel);
+      }
+      if (velocitiesY != undefined && velocitiesY.size == 1) {
+        vY = velocitiesY.values().next().value;
+        done = true;
+        break;
+      }
+    }
+    if (done)
+      break;
+  }
+
+  let velocitiesZ;
+  let vZ;
+  for (let h of zMap.values()) {
+    if (h.length < 2)
+      continue;
+    for (let i = 1; i < h.length; i++) {
+      let dist = h[i].pz - h[i-1].pz;
+      let vs = getVelocities(Math.abs(dist));
+      let relativeVelocities = new Set();
+      for (let v of vs) {
+        relativeVelocities.add(h[i].vz + v);
+        relativeVelocities.add(h[i].vz - v);
+      }
+      if (velocitiesZ == undefined) {
+        velocitiesZ = relativeVelocities;
+        continue;
+      }
+      for (let vel of velocitiesZ) {
+        if (!relativeVelocities.has(vel))
+          velocitiesZ.delete(vel);
+      }
+      if (velocitiesZ != undefined && velocitiesZ.size == 1) {
+        vZ = velocitiesZ.values().next().value;
+        let stepsBetween = dist / (vZ - h[i].vz);
+
+        // h[i] x intercept:   h[i].px + (h[i].vx * stepsFromStart) + (h[i].vx * stepsBetween)
+        // h[i-1] x intercept: h[i-1].px + (h[i-1].vx * stepsFromStart);
+        // h[i].px + (h[i].vx * stepsFromStart) + (h[i].vx * stepsBetween) = h[i-1].px + (h[i-1].vx * stepsFromStart) + (vX * stepsBetween)
+        // leftSideKnowns + (h[i].vx * stepsFromStart) = rightSideKnowns + (h[i-1].vx * stepsFromStart);
+        // stepsFromStart * (h[i].vx - h[i-1].vx) = rightSideKnowns - leftSideKnowns;
+        let leftSideKnowns = h[i].px + (h[i].vx * stepsBetween);
+        let rightSideKnowns = h[i-1].px + (vX * stepsBetween);
+        let stepsFromStart = (rightSideKnowns - leftSideKnowns) / (h[i].vx - h[i-1].vx);
+        let pX = h[i-1].px + (h[i-1].vx * stepsFromStart) - (stepsFromStart * vX);
+        let pY = h[i-1].py + (h[i-1].vy * stepsFromStart) - (stepsFromStart * vY);
+        let pZ = h[i-1].pz + (h[i-1].vz * stepsFromStart) - (stepsFromStart * vZ);
+        return pX + pY + pZ;
+      }
+    }
+  }
+}
+
+</script>
+</body>
