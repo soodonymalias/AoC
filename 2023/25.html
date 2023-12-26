@@ -1,0 +1,96 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function reachableCount(vs) {
+  let visited = new Set();
+  let first = vs.keys().next().value;
+  visited.add(first);
+  let toDo = [ first ];
+  while (toDo.length > 0) {
+    let curr = toDo.shift();
+    for (let n of vs.get(curr).neighbors) {
+      if (visited.has(n))
+        continue;
+      visited.add(n);
+      toDo.push(n);
+    }
+  }
+  return visited.size;
+}
+
+function findPath(vs, start, end) {
+  let visited = new Set();
+  visited.add(start);
+  let toDo = [ { label: start, path: [ start ] } ];
+  while (toDo.length > 0) {
+    let curr = toDo.shift();
+    for (let n of vs.get(curr.label).neighbors) {
+      if (visited.has(n))
+        continue;
+      visited.add(n);
+      let newPath = structuredClone(curr.path);
+      newPath.push(n);
+      if (n == end)
+        return newPath;
+      toDo.push({ label: n, path: newPath });
+    }
+  }
+}
+
+function part1(inputs) {
+  let vs = new Map();
+  let edges = [];
+  for (let i of inputs) {
+    let s = i.split(" ");
+    let from = s[0].substring(0, 3);
+    if (!vs.has(from)) {
+      vs.set(from, { label: from, neighbors: new Set() });
+    }
+    for (let j = 1; j < s.length; j++) {
+      if (!vs.has(s[j])) {
+        vs.set(s[j], { label: s[j], neighbors: new Set() });
+      }
+      vs.get(from).neighbors.add(s[j]);
+      vs.get(s[j]).neighbors.add(from);
+      edges.push([from, s[j]]);
+    }
+  }
+
+  let start;
+  for (let label of vs.keys()) {
+    if (start == undefined) {
+      start = label;
+      continue;
+    }
+    let end = label;
+
+    let path = findPath(vs, start, end);
+    for (let i = 1; i < path.length; i++) {
+      let copyVS = structuredClone(vs);
+      copyVS.get(path[i-1]).neighbors.delete(path[i]);
+      copyVS.get(path[i]).neighbors.delete(path[i-1]);
+      let newPath = findPath(copyVS, start, end);
+      for (let j = 1; j < newPath.length; j++) {
+        let copyCopyVS = structuredClone(copyVS);
+        copyCopyVS.get(newPath[j-1]).neighbors.delete(newPath[j]);
+        copyCopyVS.get(newPath[j]).neighbors.delete(newPath[j-1]);
+        let newNewPath = findPath(copyCopyVS, start, end);
+        for (let k = 1; k < newNewPath.length; k++) {
+          let finalVS = structuredClone(copyCopyVS);
+          finalVS.get(newNewPath[k-1]).neighbors.delete(newNewPath[k]);
+          finalVS.get(newNewPath[k]).neighbors.delete(newNewPath[k-1]);
+          let reachable = reachableCount(finalVS);
+          if (reachable != finalVS.size) {
+            return reachable * (finalVS.size - reachable);
+          }
+        }
+      }
+    }
+  }
+}
+
+function part2(inputs) {
+}
+
+</script>
+</body>
