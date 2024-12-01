@@ -19,3 +19,13 @@ function lcm(values) {
   }
   return curr;
 }
+
+function intSortAscending(array) {
+  array.sort((a, b) => a - b);
+  return array;
+}
+
+function intSortDescending(array) {
+  array.sort((a, b) => b - a);
+  return array;
+}

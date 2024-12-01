@@ -1,0 +1,46 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script src="/helpers/math.js"></script>
+<script>
+
+function getSortedLists(inputs) {
+  let list1 = []
+  let list2 = []
+  for (let i in inputs) {
+    let s = inputs[i].split("   ");
+    list1.push(parseInt(s[0]));
+    list2.push(parseInt(s[1]));
+  }
+  list1 = intSortAscending(list1);
+  list2 = intSortAscending(list2);
+  return [list1, list2];
+}
+
+function part1(inputs) {
+  let [list1, list2] = getSortedLists(inputs);
+  let result = 0;
+  for (let i = 0; i < list1.length; i++) {
+    result += Math.abs(list1[i] - list2[i]);
+  }
+  return result;
+}
+
+function part2(inputs) {
+  let [list1, list2] = getSortedLists(inputs);
+
+  let result = 0;
+  let j = 0;
+  for (let i of list1) {
+    let occurences = 0;
+    for (let j of list2) {
+      if (i == j) {
+        occurences++;
+      }
+    }
+    result += (i * occurences)
+  }
+  return result;
+}
+
+</script>
+</body>
