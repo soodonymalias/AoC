@@ -1,0 +1,66 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  return toGrid(inputs, " ", "parseInt");
+}
+
+function isSafeRow(s) {
+  let ascending = false;
+  for (let v in s) {
+    if (v == 0) {
+      continue;
+    }
+    let curr = s[v];
+    let prev = s[v-1];
+    if (curr == prev) {
+      return false;
+     }
+    if (v == 1) {
+      ascending = curr > prev;
+    }
+    if (ascending) {
+      if (curr < prev) {
+        return false;
+      }
+      if (curr > (prev + 3)) {
+        return false;
+      }
+    } else {
+      if (curr > prev) {
+        return false;
+      }
+      if (curr < (prev - 3)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+function part1(inputs) {
+  let safe = 0;
+  for (let i of inputs) {
+    if (isSafeRow(i)) {
+      safe++;
+    }
+  }
+  return safe;
+}
+
+function part2(inputs) {
+  let safe = 0;
+  for (let i of inputs) {
+    for (let count in i) {
+      let copy = i.toSpliced(count, 1);
+      if (isSafeRow(copy)) {
+        safe++;
+        break;
+      }
+    }
+  }
+  return safe;
+}
+
+</script>
+</body>
