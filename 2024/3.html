@@ -1,0 +1,79 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+//function preprocessInput(inputs) {
+//  return toGrid(inputs, ",", "parseInt");
+//}
+
+function checkForMul(string, from) {
+  if (string.substring(from, from + 4) != "mul(") {
+    return 0;
+  }
+  let curr;
+  let phase = 0;
+  for (curr = from + 4; curr < string.length; curr++) {
+    let currChar = string[curr];
+    if (phase == 0) {
+      // Getting first number, until comma
+      if (currChar == ",") {
+        phase++;
+        continue;
+      }
+      if (isNaN(currChar))
+        break;
+    } else if (phase == 1) {
+      // After the comma, the second number should start.
+      if (isNaN(currChar))
+        break;
+      phase++;
+    } else {
+      // Second number until the closing paren.
+      if (currChar == ")") {
+        phase++;
+        break;
+      }
+      if (isNaN(currChar))
+        break;
+    }
+  }
+  if (phase != 3)
+    return 0;
+  // State machine satified
+  let equation = string.substring(from + 4, curr);
+  let split = equation.split(",");
+  return parseInt(split[0]) * parseInt(split[1]);
+}
+
+function part1(inputs) {
+  let result = 0;
+  for (let i of inputs) {
+    for (let j = 0; j < i.length; j++) {
+      result += checkForMul(i, j);
+    }
+  }
+  return result;
+}
+
+function part2(inputs) {
+  let result = 0;
+  let enabled = true;
+  for (let i of inputs) {
+    for (let j = 0; j < i.length; j++) {
+      if (enabled && i.substring(j, j+7) == "don't()") {
+        enabled = false;
+        continue;
+      }
+      if (!enabled && i.substring(j, j+4) == "do()") {
+        enabled = true;
+        continue;
+      }
+      if (enabled) {
+        result += checkForMul(i, j);
+      }
+    }
+  }
+  return result;
+}
+
+</script>
+</body>
