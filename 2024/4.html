@@ -1,0 +1,82 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  return toGrid(inputs);
+}
+
+function part1(grid) {
+  const word = "XMAS";
+  const offsets = [
+    [ 0, 1 ],
+    [ 0, -1 ],
+    [ 1, 1 ],
+    [ 1, -1 ],
+    [ -1, 1 ],
+    [ -1, -1 ],
+    [ 1, 0 ],
+    [ -1, 0 ]
+  ];
+
+  let result = 0;
+  for (let i = 0; i < grid.length; i++) {
+    for (let j = 0; j < grid[i].length; j++) {
+      for (let o of offsets) {
+        let i_end = i + (3*o[0]);
+        let j_end = j + (3*o[1]);
+        if (i_end < 0 || i_end >= grid.length) {
+          continue;
+        }
+        if (j_end < 0 || j_end >= grid[i].length) {
+          continue;
+        }
+        let match = true;
+        for (let k = 0; k < 4; k++) {
+          let i_curr = i + k*o[0];
+          let j_curr = j + k*o[1];
+          let letter = word[k];
+          if (grid[i_curr][j_curr] != letter) {
+            match = false;
+            break;
+          }
+        }
+        if (match) {
+          result++;
+        }
+      }
+    }
+  }
+  return result;
+}
+
+function matchCross(grid, i, j) {
+  if (i <= 0 || (i + 1) >= grid.length) {
+    return false;
+  }
+  if (j <= 0 || (j + 1) >= grid[i].length) {
+    return false;
+  }
+  if (grid[i][j] != "A") {
+    return false;
+  }
+
+  return ((grid[i-1][j-1] == "M" && grid[i+1][j+1] == "S") ||
+          (grid[i-1][j-1] == "S" && grid[i+1][j+1] == "M")) &&
+         ((grid[i-1][j+1] == "M" && grid[i+1][j-1] == "S") ||
+          (grid[i-1][j+1] == "S" && grid[i+1][j-1] == "M"))
+}
+
+function part2(grid) {
+  let result = 0;
+  for (let i = 0; i < grid.length; i++) {
+    for (let j = 0; j < grid[i].length; j++) {
+      if (matchCross(grid, i, j)) {
+        result++;
+      }
+    }
+  }
+  return result;
+}
+
+</script>
+</body>
