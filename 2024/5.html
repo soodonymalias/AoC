@@ -1,0 +1,86 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let after = new Map();
+  let after_done = false;
+
+  let correct = new Set();
+  let incorrect = new Set();
+  for (let i of inputs) {
+    if (i.length == 0) {
+      after_done = true;
+      continue;
+    }
+    if (!after_done) {
+      let s = i.split("|");
+      if (!after.has(s[1])) {
+        after.set(s[1], new Set());
+      }
+      after.get(s[1]).add(s[0]);
+      continue;
+    }
+    let seenSet = new Set();
+    let s = i.split(",");
+    let valid = true;
+    for (let entry of s) {
+      for (let seen of seenSet) {
+        if (after.has(seen) && after.get(seen).has(entry)) {
+          valid = false;
+        }
+      }
+      seenSet.add(entry);
+    }
+    if (valid) {
+      correct.add(s);
+    } else {
+      incorrect.add(s);
+    }
+  }
+  
+  return { after, correct, incorrect };
+}
+
+function part1(state) {
+  let result = 0;
+  for (let s of state.correct) {
+    result += parseInt(s[Math.floor(s.length/2)]);
+  }
+  return result;
+}
+
+function part2(state) {
+  let result = 0;
+  for (let i of state.incorrect) {
+    let correctOrder = [];
+    let set = new Set();
+    for (let s of i) {
+      set.add(s);
+    }
+    while (set.size > 0) {
+      for (let s of set) {
+        let next = true;
+        if (state.after.has(s)) {
+          let afterList = state.after.get(s);
+          for (let t of set) {
+            if (afterList.has(t)) {
+              next = false;
+              break;
+            }
+          }
+        }
+        if (next) {
+          correctOrder.push(s);
+          set.delete(s);
+          break;
+        }
+      }
+    }
+    result += parseInt(correctOrder[Math.floor(correctOrder.length/2)]);
+  }
+  return result;
+  
+}
+
+</script>
+</body>
