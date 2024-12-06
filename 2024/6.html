@@ -1,0 +1,96 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let state = {};
+  state.grid = toGrid(inputs);
+  for (let i in state.grid) {
+    for (let j in state.grid[i]) {
+      if (state.grid[i][j] == "^") {
+        state.startI = parseInt(i);
+        state.startJ = parseInt(j);
+        return state;
+      }
+    }
+  }
+}
+
+const dirs = [ [ -1, 0 ], [ 0, 1 ], [ 1, 0 ], [ 0, -1 ] ];
+
+function part1(state) {
+  let grid = state.grid;
+  let visited = new Set();
+
+  let nextI = state.startI;
+  let nextJ = state.startJ;
+  let dir = 0;
+  visited.add(nextI + "," + nextJ);
+
+  while (true) {
+    while (true) {
+      let nextNextI = nextI + dirs[dir][0];
+      let nextNextJ = nextJ + dirs[dir][1];
+      if (nextNextI < 0 || nextNextI >= grid.length || nextNextJ < 0 || nextNextJ >= grid[0].length) {
+        return visited.size;
+      }
+      if (grid[nextNextI][nextNextJ] == "#") {
+        dir = (dir + 1) % 4;
+      } else {
+        nextI = nextNextI;
+        nextJ = nextNextJ;
+        break;
+      }
+    }
+    visited.add(nextI + "," + nextJ);
+  }
+}
+
+function blockSquare(state, blockI, blockJ) {
+  let grid = state.grid;
+  if (grid[blockI][blockJ] == "^" || grid[blockI][blockJ] == "#") {
+    return false;
+  }
+
+  let visited = new Set();
+  let off = false;
+  let nextI = state.startI;
+  let nextJ = state.startJ;
+  let dir = 0;
+
+  while (true) {
+    while (true) {
+      let nextNextI = nextI + dirs[dir][0];
+      let nextNextJ = nextJ + dirs[dir][1];
+      if (nextNextI < 0 || nextNextI >= grid.length || nextNextJ < 0 || nextNextJ >= grid[0].length) {
+        return false;
+      }
+      if (visited.has(nextNextI + "," + nextNextJ + "," + dir)) {
+        return true;
+      }
+      if (grid[nextNextI][nextNextJ] == "#" || (nextNextI == blockI && nextNextJ == blockJ)) {
+        dir = (dir + 1) % 4;
+      } else {
+        nextI = nextNextI;
+        nextJ = nextNextJ;
+        break;
+      }
+    }
+    visited.add(nextI + "," + nextJ + "," + dir);
+  }
+  return !off;
+}
+
+function part2(state) {
+  let result = 0;
+  for (let i in state.grid) {
+    for (let j in state.grid[i]) {
+      if (blockSquare(state, parseInt(i), parseInt(j))) {
+        result++;
+      }
+    }
+  }
+  return result;
+}
+
+</script>
+</body>
