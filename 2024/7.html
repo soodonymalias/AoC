@@ -1,0 +1,61 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let equations = [];
+  for (let i of inputs) {
+    let s = i.split(" ");
+    let next = {};
+    next.result = parseInt(s[0].substring(0, s[0].length - 1));
+    let values = [];
+    for (let j = 1; j < s.length; j++) {
+      values.push(parseInt(s[j]));
+    }
+    next.values = values;
+    equations.push(next);
+  }
+  return equations;
+}
+
+function valid(eq, current, pos, forPart2) {
+  if (current > eq.result) {
+    return false;
+  }
+
+  pos++;
+  if (pos == eq.values.length) {
+    return current == eq.result;
+  }
+  if (valid(eq, current + eq.values[pos], pos, forPart2)) {
+    return true;
+  }
+  if (valid(eq, current * eq.values[pos], pos, forPart2)) {
+    return true;
+  }
+  if (!forPart2) {
+    return false;
+  }
+  return valid(eq, parseInt(current + "" + eq.values[pos]), pos, forPart2);
+}
+
+function getResult(equations, forPart2) {
+  let result = 0;
+  for (let eq of equations) {
+    if (valid(eq, eq.values[0], 0, forPart2)) {
+      result += eq.result;
+    }
+  }
+  return result;
+  
+}
+
+function part1(equations) {
+  return getResult(equations, false);
+}
+
+function part2(equations) {
+  return getResult(equations, true);
+}
+
+</script>
+</body>
