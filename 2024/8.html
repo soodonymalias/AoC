@@ -1,0 +1,64 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let grid = toGrid(inputs);
+  let nodes = new Map();
+  for (let i in grid) {
+    for (let j in grid) {
+      if (grid[i][j] == ".")
+        continue;
+      if (!nodes.has(grid[i][j])) {
+        nodes.set(grid[i][j], []);
+      }
+      nodes.get(grid[i][j]).push({i: parseInt(i), j: parseInt(j)});
+    }
+  }
+  return {nodes, size: inputs.length};
+}
+
+function walk(state, keepGoing) {
+  let locs = new Set();
+  for (let n of state.nodes.values()) {
+    for (let a = 0; a < n.length - 1; a++) {
+      for (let b = a + 1; b < n.length; b++) {
+        let iDiff = n[a].i - n[b].i;
+        let jDiff = n[a].j - n[b].j;
+        let x = keepGoing ? 0 : 1;
+        while (true) {
+          let nextI = n[a].i + (x * iDiff);
+          let nextJ = n[a].j + (x * jDiff);
+          if (nextI < 0 || nextI >= state.size || nextJ < 0 || nextJ >= state.size)
+            break;
+          locs.add(nextI + "," + nextJ);
+          if (!keepGoing)
+            break;
+          x++;
+        }
+        x = keepGoing ? 0 : 1;
+        while (true) {
+          let nextI = n[b].i - (x * iDiff);
+          let nextJ = n[b].j - (x * jDiff);
+          if (nextI < 0 || nextI >= state.size || nextJ < 0 || nextJ >= state.size)
+            break;
+          locs.add(nextI + "," + nextJ);
+          if (!keepGoing)
+            break;
+          x++;
+        }
+      }
+    }
+  }
+  return locs.size;
+}
+
+function part1(state) {
+  return walk(state, false);
+}
+
+function part2(state) {
+  return walk(state, true);
+}
+
+</script>
+</body>
