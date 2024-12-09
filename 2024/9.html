@@ -1,0 +1,93 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function getDisk(inputs) {
+  let input = inputs[0];
+  let disk = [];
+  for (let i = 0; i < input.length / 2; i++) {
+    let cur = input[i];
+    for (let j = 0; j < input[i*2]; j++) {
+      disk.push(i);
+    }
+    for (let j = 0; j < input[(i*2)+1]; j++) {
+      disk.push(".");
+    }
+  }
+  return disk;
+}
+
+function checkSum(disk) {
+  let result = 0;
+  for (let i = 0; i < disk.length; i++) {
+    if (disk[i] == ".") {
+      continue;
+    }
+    result += i * disk[i];
+  }
+  return result;
+}
+
+function part1(inputs) {
+  let disk = getDisk(inputs);
+  let i = 0;
+  let j = disk.length - 1;
+  while (i < j) {
+    while (disk[i] != ".") {
+      i++;
+    }
+    while (disk[j] == ".") {
+      j--;
+    }
+    if (i >= j)
+      break;
+    disk[i] = disk[j];
+    disk[j] = ".";
+    i++;
+    j--;
+  }
+  return checkSum(disk);
+}
+
+function part2(inputs) {
+  let disk = getDisk(inputs);
+  let j = disk.length - 1;
+  while (j >= 0) {
+    while (disk[j] == ".") {
+      j--;
+    }
+    let moveVal = disk[j];
+    let moveLength = 0;
+    for (; j >=0; j--) {
+      if (disk[j] == moveVal)
+        moveLength++;
+      else
+        break;
+    }
+
+    let destStart = 0;
+    let destLength = 0;
+    for (let i = 0; i <= j; i++) {
+      if (disk[i] == ".") {
+        if (destLength == 0) {
+          destStart = i;
+        }
+        destLength++;
+        if (destLength == moveLength)
+          break;
+      } else {
+        destLength = 0;
+      }
+    }
+    if (destLength != moveLength) {
+      continue;
+    }
+    for (let i = 0; i < destLength; i++) {
+      disk[destStart + i] = moveVal;
+      disk[j+i+1] = "."
+    }
+  }
+  return checkSum(disk);
+}
+
+</script>
+</body>
