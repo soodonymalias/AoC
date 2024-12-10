@@ -1,0 +1,69 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let grid = toGrid(inputs, "", "parseInt");
+
+  let result1 = 0;
+  let result2 = 0;
+  for (let i = 0; i < grid.length; i++) {
+    for (let j = 0; j < grid[i].length; j++) {
+      if (grid[i][j] == 0) {
+        let add = countFrom(grid, i, j);
+        result1 += add.result1;
+        result2 += add.result2;
+      }
+    }
+  }
+  return {result1, result2};
+}
+
+function countFrom(grid, i, j) {
+  const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1] ];
+
+  let toVisit = [];
+  toVisit.push({i, j});
+
+  let visited = new Map();
+  visited.set(i + "," + j, 1);
+
+  let result1 = 0;
+  let result2 = 0;
+
+  while (toVisit.length > 0) {
+    let curr = toVisit.shift();
+    let currCount = visited.get(curr.i + "," + curr.j);
+    if (grid[curr.i][curr.j] == 9) {
+      result1++;
+      result2 += currCount;
+      continue;
+    }
+    for (let d of dirs) {
+      let di = curr.i + d[0];
+      let dj = curr.j + d[1];
+      if (di < 0 || di >= grid.length || dj < 0 || dj >= grid[i].length) {
+        continue;
+      }
+      if (grid[di][dj] != grid[curr.i][curr.j] + 1) {
+        continue;
+      }
+      if (!visited.has(di + "," + dj)) {
+        visited.set(di + "," + dj, 0);
+        toVisit.push({i: di, j: dj});
+      }
+      visited.set(di + "," + dj, visited.get(di + "," + dj) + currCount);
+    }
+  }
+  return { result1, result2 };
+}
+
+function part1(result) {
+  return result.result1;
+}
+
+function part2(result) {
+  return result.result2;
+}
+
+</script>
+</body>
