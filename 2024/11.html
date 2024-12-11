@@ -1,0 +1,60 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  return toGrid(inputs, " ", "parseInt")[0];
+}
+
+function addToMap(m, s, amount) {
+  if (!m.has(s)) {
+    m.set(s, amount);
+  } else {
+    m.set(s, m.get(s) + amount);
+  }
+}
+
+function blink(stones) {
+  let new_stones = new Map();
+  for (let [key, value] of stones) {
+    if (key == 0) {
+      addToMap(new_stones, 1, value);
+    } else if (("" + key).length % 2 == 0) {
+      let digits_after_split = ("" + key).length / 2;
+      let helper = Math.pow(10, digits_after_split);
+      let left = Math.floor(key / helper);
+      let right = key - (left * helper);
+      addToMap(new_stones, left, value);
+      addToMap(new_stones, right, value);
+    } else {
+      addToMap(new_stones, key * 2024, value);
+    }
+  }
+  return new_stones;
+}
+
+function go(stones, steps) {
+  let m = new Map();
+  for (let s of stones) {
+    addToMap(m, s, 1);
+  }
+  for (let i = 0; i < steps; i++) {
+    m = blink(m);
+  }
+
+  let result = 0;
+  for (let v of m.values()) {
+    result += v;
+  }
+  return result;
+}
+
+function part1(stones) {
+  return go(stones, 25);
+}
+
+function part2(stones) {
+  return go(stones, 75);
+}
+
+</script>
+</body>
