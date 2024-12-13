@@ -1,0 +1,57 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let machines = [];
+  for (let i = 0; i < inputs.length; i+=4) {
+    let m = {};
+    let a_split = inputs[i].split("+");
+    m.ax = parseInt(a_split[1].split(",")[0]);
+    m.ay = parseInt(a_split[2]);
+    let b_split = inputs[i+1].split("+");
+    m.bx = parseInt(b_split[1].split(",")[0]);
+    m.by = parseInt(b_split[2]);
+    let p_split = inputs[i+2].split("=");
+    m.px = parseInt(p_split[1].split(",")[0]);
+    m.py = parseInt(p_split[2]);
+    machines.push(m);
+  }
+  return machines;
+}
+
+function countTokens(machines) {
+  let tokens = 0;
+  for (let m of machines) {
+    let a1 = m.ax * m.by;
+    let a2 = m.ay * m.bx;
+    let a_diff = a1 - a2;
+    let p1 = m.px * m.by;
+    let p2 = m.py * m.bx;
+    let p_diff = p1 - p2;
+    if ((p_diff < 0) != (a_diff < 0)) {
+      continue;
+    }
+    if (Math.abs(p_diff) % Math.abs(a_diff) == 0) {
+      let a = p_diff / a_diff;
+      let b = (m.px - (a * m.ax)) / m.bx;
+      tokens += (3*a) + b;
+    }
+  }
+  return tokens;
+}
+
+function part1(machines) {
+  return countTokens(machines);
+}
+
+function part2(machines) {
+  for (let m of machines) {
+   m.px += 10000000000000;
+   m.py += 10000000000000;
+  }
+  return countTokens(machines);
+  return tokens;
+}
+
+</script>
+</body>
