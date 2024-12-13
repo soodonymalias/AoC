@@ -1,0 +1,105 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let grid = toGrid(inputs);
+  let visited = new Array(grid.length);
+  for (let v = 0; v < grid.length; v++) {
+    visited[v] = new Array(grid[0].length);
+    visited[v].fill(false);
+  }
+
+  let part1Result = 0;
+  let part2Result = 0;
+  for (let i in grid) {
+    for (let j in grid[i]) {
+      if (!visited[i][j]) {
+        let vals = dfs(grid, grid[i][j], parseInt(i), parseInt(j), visited);
+        part1Result += vals.area * vals.perimeter;
+        part2Result += vals.area * vals.corners;
+      }
+    }
+  }
+  return { part1Result, part2Result };
+}
+
+const offsets = [[1,0], [0,1], [-1,0], [0,-1]];
+
+function dfs(grid, type, i, j, visited) {
+  visited[i][j] = true;
+  let perimeter = 0;
+  let area = 1;
+  let neighbors = 0;
+  let corners = 0;
+  for (let o of offsets) {
+    let di = i + o[0];
+    let dj = j + o[1];
+    if (di < 0 || di >= grid.length || dj < 0 || dj >= grid[i].length ||
+        type != grid[di][dj]) {
+      perimeter++;
+    } else {
+      neighbors++;
+      if (!visited[di][dj]) {
+        let result = dfs(grid, type, di, dj, visited);
+        area += result.area;
+        perimeter += result.perimeter;
+        corners += result.corners;
+      }
+    }
+  }
+
+  if (neighbors == 0) {
+    corners += 4;
+  } else if (neighbors == 1) {
+    corners += 2;
+  } else if (neighbors == 2) {
+    let across = false;
+    if (i > 0 && i < grid.length - 1) {
+      if (grid[i-1][j] == type && grid[i+1][j] == type) {
+        across = true;
+      }
+    }
+    if (j > 0 && j < grid[i].length - 1) {
+      if (grid[i][j-1] == type && grid[i][j+1] == type) {
+        across = true;
+      }
+    }
+    if (!across) {
+      corners++;
+    }
+  }
+
+  if (neighbors >= 2) {
+    for (let o = 0; o < 4; o++) {
+      let o1 = offsets[o];
+      let o2 = offsets[(o+1)%4]
+      let di1 = i + o1[0];
+      let dj1 = j + o1[1];
+      let di2 = i + o2[0];
+      let dj2 = j + o2[1];
+      if (di1 < 0 || di1 >= grid.length || dj1 < 0 || dj1 >= grid[i].length ||
+          type != grid[di1][dj1]) {
+        continue;
+      }
+      if (di2 < 0 || di2 >= grid.length || dj2 < 0 || dj2 >= grid[i].length ||
+          type != grid[di2][dj2]) {
+        continue;
+      }
+      if (type != grid[i+o1[0]+o2[0]][j+o1[1]+o2[1]]) {
+        corners++;
+      }
+    }
+  }
+  return { area, perimeter, corners };
+}
+
+function part1(r) {
+  return r.part1Result;
+}
+
+function part2(r) {
+  return r.part2Result;
+}
+
+</script>
+</body>
