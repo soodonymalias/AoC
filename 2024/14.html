@@ -1,0 +1,84 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script src="/helpers/print_bitmap.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let bots = [];
+  for (let i of inputs) {
+    let b = {}
+    let s = i.split(" ");
+    let p = s[0].split("=")[1].split(",");
+    b.px = parseInt(p[0]);
+    b.py = parseInt(p[1]);
+    let v = s[1].split("=")[1].split(",");
+    b.vx = parseInt(v[0]);
+    b.vy = parseInt(v[1]);
+    bots.push(b);
+  }
+  return bots;
+}
+
+function part1(bots) {
+  let xDim = window.is_test ? 11 : 101;
+  let yDim = window.is_test ? 7 : 103;
+
+  let quads = new Array(4).fill(0);
+  for (let b of bots) {
+    let px = (b.px + (100*b.vx)) % xDim;
+    let py = (b.py + (100*b.vy)) % yDim;
+    if (px < 0)
+      px += xDim;
+    if (py < 0)
+      py += yDim;
+    if (px == (xDim - 1) / 2 || py == (yDim - 1) / 2) {
+      continue;
+    }
+    let q = (px > (xDim/2)) ? 2 : 0;
+    q += (py > (yDim/2)) ? 1 : 0;
+    quads[q] += 1;
+  }
+
+  let prod = 1;
+  for (let q of quads) {
+    prod *= q;
+  }
+  return prod;
+}
+
+async function part2(bots) {
+  if (window.is_test)
+    return;
+
+  let xDim = 101;
+  let yDim = 103;
+
+  let runs = 700;
+  for (let i = 0; i < xDim * yDim; i++) {
+    let grid = new Array(101);
+    for (let i = 0; i < 101; i++) {
+      grid[i] = new Array(103);
+      grid[i].fill(false);
+    }
+
+    for (let b of bots) {
+      b.px = (b.px + b.vx) % xDim;
+      b.py = (b.py + b.vy) % yDim;
+      if (b.px < 0)
+        b.px += xDim;
+      if (b.py < 0)
+        b.py += yDim;
+      grid[b.px][b.py] = true;
+    }
+    // 101 % 1 and 103 % 71 were visually distinct consistently.
+    // This prints out all values that comply and the one 
+    // where both are true is the christmas tree.
+    if ((i % 101 == 1) || (i % 103 == 71)) {
+      document.body.appendChild(document.createTextNode(i+1));
+      printBitmap(grid, 101, 103);
+    }
+    await scheduler.yield();
+  }
+}
+
+</script>
+</body>
