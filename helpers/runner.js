@@ -13,9 +13,9 @@ async function runSingle(is_test) {
 
   document.body.appendChild(document.createTextNode(is_test ? "Test:" : "Actual: "));
   document.body.appendChild(document.createElement("br"));
-  document.body.appendChild(document.createTextNode("Part 1: " + part1(inputs)));
+  document.body.appendChild(document.createTextNode("Part 1: " + (await part1(inputs))));
   document.body.appendChild(document.createElement("br"));
-  document.body.appendChild(document.createTextNode("Part 2: " + part2(inputs)));
+  document.body.appendChild(document.createTextNode("Part 2: " + await part2(inputs)));
   document.body.appendChild(document.createElement("br"));
   let runtime = performance.now() - start_time;
   document.body.appendChild(document.createTextNode("Runtime: " + Math.round(runtime) + "ms"));

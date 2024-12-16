@@ -129,7 +129,36 @@ function part2Shift(grid, i, j, dir, move, newVal) {
   return true;
 }
 
-function part2(inputs) {
+function print(grid) {
+  let table = document.getElementById("table");
+  if (table == null || table.rows.length != grid.length) {
+    if (table != null)
+      table.remove();
+    table = document.createElement("table");
+    table.id = "table";
+    for (let i = 0; i < grid.length; i++) {
+      let tr = table.insertRow();
+      for (let j = 0; j < grid[i].length; j++) {
+        let cell = tr.insertCell();
+        cell.style.fontSize = "6px";
+        cell.style.textAlign = "center";
+        cell.style.padding = "0px";
+        cell.style.width = "6px";
+        cell.style.height = "6px";
+      }
+    }
+  }
+
+  for (let i = 0; i < grid.length; i++) {
+    let row = table.rows[i];
+    for (let j = 0; j < grid[i].length; j++) {
+      row.cells[j].innerText = grid[i][j];
+    }
+  }
+  document.body.appendChild(table);
+}
+
+async function part2(inputs) {
   let grid_ended = false;
   let grid = [];
   let steps = [];
@@ -175,6 +204,8 @@ function part2(inputs) {
     }
   }
 
+  print(grid);
+
   for (let dir of steps) {
     let move = getMove(dir);
     let i = currI + move[0];
@@ -186,8 +217,9 @@ function part2(inputs) {
     part2Shift(grid, i, j, dir, move, "@");
     currI = i;
     currJ = j;
+    print(grid);
+    await scheduler.yield();
   }
-  console.log(grid);
 
   let result = 0;
   for (let i = 0; i < grid.length; i++) {
