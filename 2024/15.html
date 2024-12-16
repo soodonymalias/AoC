@@ -147,6 +147,7 @@ function print(grid) {
         cell.style.height = "6px";
       }
     }
+    document.getElementById("progress").appendChild(table);
   }
 
   for (let i = 0; i < grid.length; i++) {
@@ -155,7 +156,6 @@ function print(grid) {
       row.cells[j].innerText = grid[i][j];
     }
   }
-  document.body.appendChild(table);
 }
 
 async function part2(inputs) {

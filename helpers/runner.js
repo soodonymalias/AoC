@@ -11,22 +11,25 @@ async function runSingle(is_test) {
   if (window.preprocessInput)
     inputs = preprocessInput(inputs);
 
-  document.body.appendChild(document.createTextNode(is_test ? "Test:" : "Actual: "));
-  document.body.appendChild(document.createElement("br"));
-  document.body.appendChild(document.createTextNode("Part 1: " + (await part1(inputs))));
-  document.body.appendChild(document.createElement("br"));
-  document.body.appendChild(document.createTextNode("Part 2: " + await part2(inputs)));
-  document.body.appendChild(document.createElement("br"));
+  let p1 = await part1(inputs);
+  let div1 = document.getElementById(is_test ? "t1" : "a1");
+  div1.innerText = p1;
+  let p2 = await part2(inputs);
+  let div2 = document.getElementById(is_test ? "t2" : "a2");
+  div2.innerText = p2;
   let runtime = performance.now() - start_time;
-  document.body.appendChild(document.createTextNode("Runtime: " + Math.round(runtime) + "ms"));
-  document.body.appendChild(document.createElement("br"));
-  document.body.appendChild(document.createElement("br"));
+  let runtimeDiv = document.getElementById(is_test ? "tr" : "ar");
+  runtimeDiv.innerText = Math.round(runtime) + "ms";
 }
 
 async function run() {
   await runSingle(true);
   await runSingle(false);
 };
+
+document.write("Test:<div>Part 1:<div id='t1'></div></div>Part 2:<div id='t2'></div>Runtime:<div id='tr'></div><br>");
+document.write("Actual:<br>Part 1:<div id='a1'></div>Part 2:<div id='a2'></div>Runtime:<div id='ar'></div>");
+document.write("<br><div id='progress'></div>");
 
 window.onload = run;
 
