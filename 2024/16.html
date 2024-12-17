@@ -1,0 +1,113 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  return toGrid(inputs);
+}
+
+const offsets = [[1,0], [0, 1], [-1,0], [0,-1]];
+
+function maybeSetAndPush(grid, best, p, next) {
+  if (grid[next.i][next.j] == "#")
+    return;
+  let best_key = next.i + "," + next.j + "," + next.o;
+  let b = best.get(best_key);
+  if (b != null && b < next.v) {
+    return;
+  }
+  best.set(best_key, next.v);
+  next.path = structuredClone(next.path);
+  next.path.push(next);
+  p.push(next);
+}
+
+let testPaths = [];
+let testBest = Number.MAX_SAFE_INTEGER;
+let actualPaths = [];
+let actualBest = Number.MAX_SAFE_INTEGER;
+
+function part1(grid) {
+  let sortFunc = (a,b) => {
+    if (a.v > b.v) {
+      return -1;
+    }
+    if (a.v < b.v) {
+      return 1;
+    }
+    return 0;
+  };
+
+  let p = [];
+  let best = new Map();
+
+  maybeSetAndPush(grid, best, p, {i: grid.length - 2, j: 1, o: 1, v: 0, path: [] });
+  while (p.length > 0) {
+    let next = p.pop();
+    if (next.i == 1 && next.j == grid[0].length - 2) {
+      if (window.is_test) {
+        testPaths.push(next.path);
+        testBest = Math.min(next.v, testBest);
+      } else {
+        actualPaths.push(next.path);
+        actualBest = Math.min(next.v, actualBest);
+      }
+      continue;
+    }
+
+    let nturn = next.o;
+    maybeSetAndPush(
+        grid, best, p,
+        { i: next.i + offsets[nturn][0],
+          j: next.j + offsets[nturn][1],
+          o: nturn,
+          v: (next.v + 1),
+          path: next.path
+        });
+
+    nturn = (next.o+1) % 4;
+    maybeSetAndPush(
+        grid, best, p,
+        { i: next.i,
+          j: next.j,
+          o: nturn,
+          v: next.v + 1000,
+          path: next.path
+        });
+    nturn = (next.o+3) % 4;
+    maybeSetAndPush(
+        grid, best, p,
+        { i: next.i,
+          j: next.j,
+          o: nturn,
+          v: next.v + 1000,
+          path: next.path
+        });
+    p.sort(sortFunc);
+  }
+
+
+  if (window.is_test) {
+    window.p1Test = best;
+  } else {
+    window.p1 = best;
+  }
+  return window.is_test ? testBest : actualBest;
+}
+
+function part2(grid) {
+  let best = window.is_test ? testBest : actualBest;
+  let paths = window.is_test ? testPaths : actualPaths;
+  let route = new Set();
+  for (let p of paths) {
+    if (p[p.length-1].v > best) {
+      continue;
+    }
+    for (let step of p) {
+      route.add(step.i + "," + step.j);
+    }
+  }
+  return route.size;
+}
+
+</script>
+</body>
