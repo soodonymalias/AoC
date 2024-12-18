@@ -1,0 +1,65 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+
+const offsets = [[0,1],[1,0],[-1,0],[0,-1]];
+
+function shortestPath(grid) {
+  let q = new Array();
+  q.push([0,0]);
+  grid[0][0] = 0;
+  while (q.length > 0) {
+    let curr = q.shift();
+    if (curr[0] == grid.length - 1 && curr[1] == grid.length - 1) {
+      return grid[curr[0]][curr[1]];
+    }
+    for (let o of offsets) {
+      let ci = curr[0] + o[0];
+      let cj = curr[1] + o[1];
+      if (ci < 0 || ci >= grid.length || cj < 0 || cj >= grid.length) {
+        continue;
+      }
+      if (grid[ci][cj] == null) {
+        grid[ci][cj] = grid[curr[0]][curr[1]] + 1;
+        q.push([ci, cj]);
+      }
+    }
+  }
+  return null;
+}
+
+function initGrid(inputs) {
+  let grid_size = window.is_test ? 7 : 71;
+  let bytes = window.is_test ? 12 : 1024;
+  let grid = new Array(grid_size);
+  for (let i = 0; i < grid_size; i++) {
+    grid[i] = new Array(grid_size);
+    grid[i].fill(null);
+  }
+
+  for (let i = 0; i < bytes; i++) {
+    let s = inputs[i].split(",");
+    grid[s[1]][s[0]] = -1;
+  }
+  return grid;
+}
+
+function part1(inputs) {
+  return shortestPath(initGrid(inputs));
+}
+
+function part2(inputs) {
+  let bytes = window.is_test ? 12 : 1024;
+  let grid = initGrid(inputs);
+  while (bytes < inputs.length) {
+    bytes++;
+    let s = inputs[bytes].split(",");
+    grid[s[1]][s[0]] = -1;
+    if (shortestPath(structuredClone(grid)) == null) {
+      return inputs[bytes];
+    }
+  }
+}
+
+</script>
+</body>
