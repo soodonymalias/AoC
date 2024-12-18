@@ -1,0 +1,92 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let inst = inputs[4].split(" ")[1].split(",");
+  let instructions = [];
+  for (let i of inst) {
+    instructions.push(parseInt(i));
+  }
+  return {
+    a : parseInt(inputs[0].split(" ")[2]),
+    b : parseInt(inputs[1].split(" ")[2]),
+    c : parseInt(inputs[2].split(" ")[2]),
+    instructions
+  };
+}
+
+function combo(val, program) {
+  if (val <= 3) {
+    return val;
+  }
+  if (val == 4)
+    return program.a;
+  if (val == 5)
+    return program.b;
+  if (val == 6)
+    return program.c;
+}
+
+function run(program, i, output) {
+  let inst = program.instructions[i];
+  let operand = program.instructions[i+1];
+  if (inst == 0) {
+    program.a = Math.floor(program.a / Math.pow(2, combo(operand, program)));
+  } else if (inst == 1) {
+    program.b = program.b ^ operand;
+  } else if (inst == 2) {
+    program.b = combo(operand, program) % 8;
+  } else if (inst == 3) {
+    if (program.a != 0) {
+      return operand;
+    }
+  } else if (inst == 4) {
+    program.b = program.b ^ program.c;
+  } else if (inst == 5) {
+    output.push(combo(operand, program) % 8);
+  } else if (inst == 6) {
+    program.b = Math.floor(program.a / Math.pow(2, combo(operand, program)));
+  } else if (inst == 7) {
+    program.c = Math.floor(program.a / Math.pow(2, combo(operand, program)));
+  }
+  return i + 2;
+}
+
+function part1(p) {
+  let program = structuredClone(p);
+  let i = 0;
+  let output = []
+  while (i < program.instructions.length) {
+    i = run(program, i, output);
+  }
+  return output.join(",");
+}
+
+function part2(program) {
+  let startI = 0;
+  let i = startI;
+  while (true) {
+    program.a = i;
+    let result = part1(program);
+    if (result == program.instructions)
+      return i;
+    i++;
+
+    let partial_match = true;
+    for (let j = 0; j < 2; j++) {
+      if (result[j] != program.instructions[j])
+        partial_match = false;
+    }
+    if (result.length == program.instructions.length || partial_match) {
+      console.log(i + " " + result);
+    }
+    if (i % 1000 == 0) {
+      scheduler.yield();
+    }
+    if (i > 10000000)
+      return;
+  }
+}
+
+</script>
+</body>
