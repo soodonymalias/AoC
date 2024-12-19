@@ -43,7 +43,9 @@ function run(program, i, output) {
   } else if (inst == 4) {
     program.b = program.b ^ program.c;
   } else if (inst == 5) {
-    output.push(combo(operand, program) % 8);
+    let result = combo(operand, program) % 8;
+    if (result < 0) result += 8;
+    output.push(result);
   } else if (inst == 6) {
     program.b = Math.floor(program.a / Math.pow(2, combo(operand, program)));
   } else if (inst == 7) {
@@ -63,28 +65,53 @@ function part1(p) {
 }
 
 function part2(program) {
+  if (window.is_test) return;
   let startI = 0;
   let i = startI;
   while (true) {
-    program.a = i;
+    program.a = Math.pow(2, 54);
+    program.a = Math.pow(2, 53);
+    program.a = Math.pow(2, 48);
+    program.a = Math.pow(2, 47);
+    program.a = Math.pow(2, 46);
+    /*program.a += Math.pow(2, 41);
+    program.a += Math.pow(2, 37);
+    program.a += Math.pow(2, 36);
+    program.a += Math.pow(2, 33);
+    program.a += Math.pow(2, 32);
+    program.a += Math.pow(2, 31);
+    program.a += Math.pow(2, 30);
+    program.a += Math.pow(2, 26);
+    program.a += Math.pow(2, 24);
+    program.a += Math.pow(2, 23);
+    program.a += Math.pow(2, 22);
+    program.a += Math.pow(2, 20);*/
+    program.a += Math.pow(2, 15);
+    program.a += 42;
+    program.a += 512;
+    program.a += 2048;
+    program.a += 4096;
+    program.a += 8192;
+    program.a += Math.pow(2, i);
+    //program.a += Math.pow(2, i-1);
+    //program.a += Math.pow(2, i-2);
+    //program.a += Math.pow(2, i-3);
     let result = part1(program);
     if (result == program.instructions)
       return i;
-    i++;
 
     let partial_match = true;
     for (let j = 0; j < 2; j++) {
       if (result[j] != program.instructions[j])
         partial_match = false;
     }
-    if (result.length == program.instructions.length || partial_match) {
-      console.log(i + " " + result);
-    }
+    console.log(i + " " + result.length + " "  + result);
     if (i % 1000 == 0) {
       scheduler.yield();
     }
-    if (i > 10000000)
+    if (i > 65)
       return;
+    i++;
   }
 }
 
