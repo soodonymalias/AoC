@@ -1,0 +1,64 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let state = {}
+  state.towels = inputs[0].split(", ");
+  state.designs = [];
+  for (let i = 2; i < inputs.length; i++) {
+    state.designs.push(inputs[i]);
+  }
+
+  let part1Result = 0;
+  let part2Result = 0;
+  let solved = new Map();
+  let impossible = new Set();
+  for (let d of state.designs) {
+    let possibilities = make(d, state.towels, solved, impossible);
+    part2Result += possibilities;
+    if (possibilities != 0) {
+      part1Result++;
+    }
+    
+  }
+  return { part1Result, part2Result };
+}
+
+function make(design, towels, solved, impossible) {
+  let ways = solved.get(design);
+  if (ways != null)
+    return ways;
+  if (impossible.has(design))
+    return 0;
+
+  ways = 0;
+  for (let t of towels) {
+    let sub = design.substring(0, t.length);
+    if (sub != t) {
+      continue;
+    }
+    if (design == t) {
+      ways++;
+      continue;
+    }
+    ways += make(design.substring(t.length), towels, solved, impossible);
+  }
+  if (ways == 0) {
+    impossible.add(design);
+  } else {
+    solved.set(design, ways);
+  }
+  return ways;
+}
+
+
+function part1(results) {
+  return results.part1Result;
+}
+
+function part2(results) {
+  return results.part2Result;
+}
+
+</script>
+</body>
