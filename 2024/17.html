@@ -69,47 +69,79 @@ function part2(program) {
   let startI = 0;
   let i = startI;
   while (true) {
-    program.a = Math.pow(2, 54);
-    program.a = Math.pow(2, 53);
-    program.a = Math.pow(2, 48);
-    program.a = Math.pow(2, 47);
-    program.a = Math.pow(2, 46);
-    /*program.a += Math.pow(2, 41);
-    program.a += Math.pow(2, 37);
-    program.a += Math.pow(2, 36);
-    program.a += Math.pow(2, 33);
-    program.a += Math.pow(2, 32);
-    program.a += Math.pow(2, 31);
-    program.a += Math.pow(2, 30);
-    program.a += Math.pow(2, 26);
-    program.a += Math.pow(2, 24);
-    program.a += Math.pow(2, 23);
-    program.a += Math.pow(2, 22);
-    program.a += Math.pow(2, 20);*/
-    program.a += Math.pow(2, 15);
-    program.a += 42;
+    /*program.a = 0;
+    program.a += 47;
     program.a += 512;
     program.a += 2048;
-    program.a += 4096;
     program.a += 8192;
-    program.a += Math.pow(2, i);
-    //program.a += Math.pow(2, i-1);
-    //program.a += Math.pow(2, i-2);
-    //program.a += Math.pow(2, i-3);
+    program.a += Math.pow(2, 20);
+    program.a += Math.pow(2, 23);
+    program.a += Math.pow(2, 25);
+    program.a += Math.pow(2, 26);
+    program.a += Math.pow(2, 27);
+    program.a += Math.pow(2, 28);
+    //
+    program.a += Math.pow(2, 30);
+    program.a += Math.pow(2, 32);
+    program.a += Math.pow(2, 37);
+    program.a += Math.pow(2, 38);*/
+    program.a = 0;
+    let base = 38;
+    program.a += Math.pow(2, 0);
+    program.a += Math.pow(2, 1);//
+    program.a += Math.pow(2, 2);
+    program.a += Math.pow(2, 3);
+    program.a += Math.pow(2, 5);
+    program.a += Math.pow(2, 9);
+    program.a += Math.pow(2, 11);
+    program.a += Math.pow(2, 13);
+    //program.a += Math.pow(2, 19);
+    program.a += Math.pow(2, 21);
+    program.a += Math.pow(2, 22);
+    program.a += Math.pow(2, 27);
+    program.a += Math.pow(2, 28);
+    program.a += Math.pow(2, 30);
+    program.a += Math.pow(2, 32);
+    program.a += Math.pow(2, 33);
+    program.a += Math.pow(2, 37);
+    if (i != 0) {
+      if (i & 1) {
+        program.a += Math.pow(2, base);
+      }
+      if (i & 2) {
+        program.a += Math.pow(2, base +1);
+      }
+      if (i & 4) {
+        program.a += Math.pow(2, base + 2);
+      }
+      if (i & 8) {
+        program.a += Math.pow(2, base + 3);
+      }
+      if (i & 16) {
+        program.a += Math.pow(2, base + 4);
+      }
+      if (i & 32) {
+        program.a += Math.pow(2, base + 5);
+      }
+      if (i & 64) {
+        program.a += Math.pow(2, base + 6);
+      }
+      if (i & 128) {
+        program.a += Math.pow(2, base + 7);
+      }
+      if (i & 256) {
+        program.a += Math.pow(2, base + 8);
+      }
+      if (i & 512) {
+        program.a += Math.pow(2, base + 9);
+      }
+    }
     let result = part1(program);
     if (result == program.instructions)
       return i;
 
-    let partial_match = true;
-    for (let j = 0; j < 2; j++) {
-      if (result[j] != program.instructions[j])
-        partial_match = false;
-    }
     console.log(i + " " + result.length + " "  + result);
-    if (i % 1000 == 0) {
-      scheduler.yield();
-    }
-    if (i > 65)
+    if (i >= 1024)
       return;
     i++;
   }
