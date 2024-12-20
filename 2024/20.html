@@ -1,0 +1,159 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  return toGrid(inputs);
+}
+
+let offsets = [[1,0],[0,1],[-1,0],[0,-1]];
+
+function findShortest(grid, si, sj, ei, ej, max) {
+  let todo = [];
+  let visited = new Set();
+  todo.push({i: si, j: sj, v: 0});
+  visited.add(si + "," + sj);
+  while (todo.length > 0) {
+    let curr = todo.shift();
+    if (curr.v + Math.abs(ei - curr.i) + Math.abs(ej - curr.j) > max)
+      break;
+    for (let o of offsets) {
+      let i = curr.i + o[0];
+      let j = curr.j + o[1];
+      if (i == ei && j == ej) {
+        return curr.v + 1;
+      }
+      if (i < 0 || i >= grid.length || j < 0 || j >= grid[i].length)
+        continue;
+      if (grid[i][j] == "#") {
+        continue;
+      }
+      if (visited.has(i + "," + j))
+        continue;
+      todo.push({i, j, v: curr.v + 1});
+      visited.add(i + "," + j);
+    }
+  }
+  return -1;
+}
+function findShortest20(grid, si, sj, ei, ej, clipi, clipj, clipdist, max) {
+  let todo = [];
+  let visited = new Set();
+  todo.push({i: si, j: sj, v: 0});
+  visited.add(si + "," + sj);
+  let routes = 0;
+  while (todo.length > 0) {
+    let curr = todo.shift();
+    let canarydist = Math.abs(curr.i - ei) + Math.abs(curr.j - ej);
+    if (curr.i == clipj && curr.j == clipj) {
+      if (canarydist < clipdist) {
+        routes++;
+        console.log(curr.v + canarydist);
+        continue;
+      }
+      for (let di = 0 - clipdist; i <= clipdist; i++) {
+        for (let dj = 0 - clipdist; j <= clipdist; j++) {
+          let i = curr.i + di;
+          let j = curr.j + dj;
+          if (i < 0 || i >= grid.length || j < 0 || j >= grid[i].length)
+            continue;
+          if (grid[i][j] == "#") {
+            continue;
+          }
+          if (visited.has(i + "," + j)) {
+            continue;
+          }
+          visited.add(i + "," + j);
+          if (Math.abs(i) + Math.abs(j) == clipdist) {
+            todo.push({i, j, v: curr.v + clipdist});
+          }
+        }
+      }
+    }
+    if (curr.v + canarydist > max)
+      break;
+    for (let o of offsets) {
+      let i = curr.i + o[0];
+      let j = curr.j + o[1];
+      if (i == ei && j == ej) {
+        console.log(curr.v + 1);
+        routes++;
+        continue;
+      }
+      if (i < 0 || i >= grid.length || j < 0 || j >= grid[i].length)
+        continue;
+      if (grid[i][j] == "#") {
+        continue;
+      }
+      if (visited.has(i + "," + j))
+        continue;
+      todo.push({i, j, v: curr.v + 1});
+      visited.add(i + "," + j);
+    }
+  }
+  return routes;
+}
+
+function part1(grid) {
+  return;
+  let si;
+  let sj;
+  let ei;
+  let ej;
+  for (let i in grid) {
+    for (let j in grid[i]) {
+      if (grid[i][j] == "S") {
+        si = parseInt(i);
+        sj = parseInt(j);
+      } else if (grid[i][j] == "E") {
+        ei = parseInt(i);
+        ej = parseInt(j);
+      }
+    }
+  }
+  let normal = findShortest(grid, si, sj, ei, ej, Number.MAX_SAFE_INTEGER);
+  let threshold = 100;
+  let result = 0;
+  for (let i = 1; i < grid.length - 1; i++) {
+    for (let j = 1; j < grid[i].length - 1; j++) {
+      if (grid[i][j] != "#")
+        continue;
+      grid[i][j] = "1";
+      if (findShortest(grid, si, sj, ei, ej, normal-threshold) != -1) {
+        result++;
+      }
+      grid[i][j] = "#";
+    }
+  }
+  return result;
+}
+
+function part2(grid) {
+  if (!window.is_test) return;
+  let si;
+  let sj;
+  let ei;
+  let ej;
+  for (let i in grid) {
+    for (let j in grid[i]) {
+      if (grid[i][j] == "S") {
+        si = parseInt(i);
+        sj = parseInt(j);
+      } else if (grid[i][j] == "E") {
+        ei = parseInt(i);
+        ej = parseInt(j);
+      }
+    }
+  }
+  let normal = findShortest(grid, si, sj, ei, ej, Number.MAX_SAFE_INTEGER);
+  let threshold = 50;
+  let result = 0;
+  for (let i = 1; i < grid.length - 1; i++) {
+    for (let j = 1; j < grid[i].length - 1; j++) {
+      result += findShortest20(grid, si, sj, ei, ej, i, j, 20, normal-threshold);
+    }
+  }
+  return result;
+}
+
+</script>
+</body>
