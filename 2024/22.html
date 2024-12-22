@@ -1,0 +1,74 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let secrets = [];
+  for (let i of inputs) {
+    secrets.push(parseInt(i));
+  }
+  return secrets;
+}
+
+function mixPrune(s, m) {
+  let x = s ^ m;
+  x = x % 16777216;
+  if (x < 0)
+    x += 16777216;
+  return x;
+}
+
+function nextSecret(s) {
+  s = mixPrune(s, s * 64);
+  s = mixPrune(s, Math.floor(s / 32));
+  s = mixPrune(s, s * 2048);
+  return s;
+}
+
+function part1(secrets) {
+  let result = 0;
+  for (let s of secrets) {
+    for (let i = 0; i < 2000; i++) {
+      s = nextSecret(s);
+    }
+    result += s;
+  }
+  return result;
+}
+
+function part2(secrets) {
+  let result = 0;
+  let metamap = new Map();
+  for (let s of secrets) {
+    let map = new Map();
+    let last4 = [];
+    let prev = null;
+    for (let i = 0; i < 2000; i++) {
+      prev = s;
+      s = nextSecret(s);
+      last4.push((s % 10) - (prev % 10));
+      if (last4.length == 5)
+        last4.shift();
+      if (last4.length == 4) {
+        let key = last4.join(",");
+        if (map.has(key)) {
+          continue;
+        }
+        map.set(key, s % 10);
+      }
+    }
+    for (let m of map) {
+      let old = metamap.get(m[0]);
+      if (old == null)
+        old = 0;
+      metamap.set(m[0], m[1] + old);
+    }
+  }
+  let max = 0;
+  for (let m of metamap.values()) {
+    max = Math.max(m, max);
+  }
+  return max;
+}
+
+</script>
+</body>
