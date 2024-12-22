@@ -27,13 +27,25 @@ function combo(val, program) {
     return program.c;
 }
 
+function safeXor(a, b) {
+  let result = 0;
+  for (let i = 0; i < 64; i++) {
+    let v = Math.pow(2, i);
+    if ((a & v) != (b & v)) {
+      result += v;
+    }
+  }
+  return result;
+}
+
 function run(program, i, output) {
   let inst = program.instructions[i];
   let operand = program.instructions[i+1];
   if (inst == 0) {
     program.a = Math.floor(program.a / Math.pow(2, combo(operand, program)));
   } else if (inst == 1) {
-    program.b = program.b ^ operand;
+    //program.b = program.b ^ operand;
+    program.b = safeXor(program.b, operand);
   } else if (inst == 2) {
     program.b = combo(operand, program) % 8;
   } else if (inst == 3) {
@@ -41,7 +53,8 @@ function run(program, i, output) {
       return operand;
     }
   } else if (inst == 4) {
-    program.b = program.b ^ program.c;
+    //program.b = program.b ^ program.c;
+    program.b = safeXor(program.b, program.c);
   } else if (inst == 5) {
     let result = combo(operand, program) % 8;
     if (result < 0) result += 8;
@@ -86,7 +99,6 @@ function part2(program) {
     program.a += Math.pow(2, 37);
     program.a += Math.pow(2, 38);*/
     program.a = 0;
-    let base = 38;
     program.a += Math.pow(2, 0);
     program.a += Math.pow(2, 1);//
     program.a += Math.pow(2, 2);
@@ -95,13 +107,14 @@ function part2(program) {
     program.a += Math.pow(2, 9);
     program.a += Math.pow(2, 11);
     program.a += Math.pow(2, 13);
-    //program.a += Math.pow(2, 19);
+    program.a += Math.pow(2, 19);
     program.a += Math.pow(2, 21);
     program.a += Math.pow(2, 22);
     program.a += Math.pow(2, 27);
     program.a += Math.pow(2, 28);
     program.a += Math.pow(2, 30);
     program.a += Math.pow(2, 32);
+    let base = 44;
     program.a += Math.pow(2, 33);
     program.a += Math.pow(2, 37);
     if (i != 0) {
