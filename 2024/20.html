@@ -35,66 +35,67 @@ function findShortest(grid, si, sj, ei, ej, max) {
   }
   return -1;
 }
-function findShortest20(grid, si, sj, ei, ej, clipi, clipj, clipdist, max) {
+
+function markDistances(grid, ei, ej) {
   let todo = [];
-  let visited = new Set();
-  todo.push({i: si, j: sj, v: 0});
-  visited.add(si + "," + sj);
-  let routes = 0;
+  todo.push({i: ei, j: ej });
+  let distances = new Map();
+  distances.set(ei + "," + ej, 0);
   while (todo.length > 0) {
     let curr = todo.shift();
-    let canarydist = Math.abs(curr.i - ei) + Math.abs(curr.j - ej);
-    if (curr.i == clipj && curr.j == clipj) {
-      if (canarydist < clipdist) {
-        routes++;
-        console.log(curr.v + canarydist);
+    for (let o of offsets) {
+      let v = distances.get(curr.i + "," + curr.j);
+      let i = curr.i + o[0];
+      let j = curr.j + o[1];
+      if (i < 0 || i >= grid.length || j < 0 || j >= grid[i].length)
+        continue;
+      if (grid[i][j] == "#")
+        continue;
+      if (distances.has(i + "," + j)) {
         continue;
       }
-      for (let di = 0 - clipdist; i <= clipdist; i++) {
-        for (let dj = 0 - clipdist; j <= clipdist; j++) {
-          let i = curr.i + di;
-          let j = curr.j + dj;
-          if (i < 0 || i >= grid.length || j < 0 || j >= grid[i].length)
-            continue;
-          if (grid[i][j] == "#") {
-            continue;
-          }
-          if (visited.has(i + "," + j)) {
-            continue;
-          }
-          visited.add(i + "," + j);
-          if (Math.abs(i) + Math.abs(j) == clipdist) {
-            todo.push({i, j, v: curr.v + clipdist});
-          }
-        }
-      }
+      distances.set(i + "," + j, v + 1);
+      todo.push({i, j});
     }
-    if (curr.v + canarydist > max)
-      break;
+  }
+  return distances;
+}
+
+function countShortcutsFrom(grid, startI, startJ, normal, threshold, startDistances, endDistances) {
+  let startDistance = startDistances.get(startI + "," + startJ);
+  let todo = [{i : startI, j : startJ, v: 0}];
+  let visited = new Set();
+  let results = new Set();
+  visited.add(startI + "," + startJ);
+  while (todo.length > 0) {
+    let curr = todo.shift();
     for (let o of offsets) {
       let i = curr.i + o[0];
       let j = curr.j + o[1];
-      if (i == ei && j == ej) {
-        console.log(curr.v + 1);
-        routes++;
+      let v = curr.v + 1;
+      if (v > 20)
         continue;
-      }
       if (i < 0 || i >= grid.length || j < 0 || j >= grid[i].length)
         continue;
-      if (grid[i][j] == "#") {
-        continue;
-      }
       if (visited.has(i + "," + j))
         continue;
-      todo.push({i, j, v: curr.v + 1});
+      if (grid[i][j] != "#") {
+        let endDistance = endDistances.get(i + "," + j);
+        let totalWalk = startDistance + v + endDistance;
+        let savings = normal - totalWalk;
+        if (savings >= threshold) {
+          visited.add(i + "," + j);
+          results.add(i + "," + j);
+        }
+      }
       visited.add(i + "," + j);
+      todo.push({i, j, v});
     }
   }
-  return routes;
+  return results.size;
 }
 
 function part1(grid) {
-  return;
   let si;
   let sj;
   let ei;
@@ -128,7 +129,6 @@ function part1(grid) {
 }
 
 function part2(grid) {
-  if (!window.is_test) return;
   let si;
   let sj;
   let ei;
@@ -144,12 +144,18 @@ function part2(grid) {
       }
     }
   }
+
+  let startDistances = markDistances(grid, si, sj);
+  let endDistances = markDistances(grid, ei, ej);
   let normal = findShortest(grid, si, sj, ei, ej, Number.MAX_SAFE_INTEGER);
-  let threshold = 50;
+
+  let threshold = 100;
   let result = 0;
-  for (let i = 1; i < grid.length - 1; i++) {
-    for (let j = 1; j < grid[i].length - 1; j++) {
-      result += findShortest20(grid, si, sj, ei, ej, i, j, 20, normal-threshold);
+  for (let i = 0; i < grid.length; i++) {
+    for (let j = 0; j < grid[i].length; j++) {
+      if (grid[i][j] == "#")
+        continue;
+      result += countShortcutsFrom(grid, i, j, normal, threshold, startDistances, endDistances);
     }
   }
   return result;
