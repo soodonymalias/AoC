@@ -1,15 +1,6 @@
 <body>
 <script src="/helpers/runner.js"></script>
 <script>
-
-const arrowcoords = {
-  '^': [0,1],
-  A: [0,2],
-  '<': [1,0],
-  v: [1,1],
-  '>': [1,2]
-};
-  
 const numpadcoords = {
   0: [3,1],
   A: [3,2],
@@ -23,7 +14,6 @@ const numpadcoords = {
   8: [0,1],
   9: [0,2]
 };
-
 
 function pathsTo(curr, target, blocked) {
   let paths = new Set();
@@ -72,13 +62,13 @@ function pathsTo(curr, target, blocked) {
   return paths;
 }
 
-function stepsFor(val, coords, fornum) {
+function stepsForNums(val) {
   let steps = [];
-  let curr = coords["A"];
+  let curr = numpadcoords["A"];
   let paths = new Set();
   for (let i = 0; i < val.length; i++) {
-    let next = coords[val[i]];
-    let nextStepPaths = pathsTo(curr, next, fornum ? [3, 0] : [0,0]);
+    let next = numpadcoords[val[i]];
+    let nextStepPaths = pathsTo(curr, next, [3, 0]);
     let newPaths = new Set();
     if (paths.size == 0) {
       paths = nextStepPaths;
@@ -96,39 +86,77 @@ function stepsFor(val, coords, fornum) {
 }
 
 let cache = new Map();
-cache.set("^^>A", "<AAv>A^A"); // better
-cache.set(">vA", "vA<A^>A"); // same
-cache.set(">^A", "vA<^A>A"); // defaut, better
+
+function stepsForArrows(val) {
+  let steps = [];
+  let curr = "A";
+  for (let i = 0; i < val.length; i++) {
+    let next = val[i];
+    if (curr == next) {
+      steps.push("A");
+    } else if (curr == "A") {
+      if (next == "^") {
+        steps.push("<A");
+      } else if (next == ">") {
+        steps.push("vA");
+      } else if (next == "v") {
+        steps.push("<vA");
+      } else if (next == "<") {
+        steps.push("v<<A");
+      }
+    } else if (curr == "^") {
+      if (next == "A") {
+        steps.push(">A");
+      } else if (next == ">") {
+        steps.push("v>A");
+      } else if (next == "v") {
+        steps.push("vA");
+      } else if (next == "<") {
+        steps.push("v<A");
+      }
+    } else if (curr == ">") {
+      if (next == "A") {
+        steps.push("^A");
+      } else if (next == "^") {
+        steps.push("<^A");
+      } else if (next == "v") {
+        steps.push("<A");
+      } else if (next == "<") {
+        steps.push("<<A");
+      }
+    } else if (curr == "v") {
+      if (next == "A") {
+        steps.push("^>A");
+      } else if (next == "^") {
+        steps.push("^A");
+      } else if (next == ">") {
+        steps.push(">A");
+      } else if (next == "<") {
+        steps.push("<A");
+      }
+    } else if (curr == "<") {
+      if (next == "A") {
+        steps.push(">>^A");
+      } else if (next == "^") {
+        steps.push(">^A");
+      } else if (next == ">") {
+        steps.push(">>A");
+      } else if (next == "v") {
+        steps.push(">A");
+      }
+    }
+    curr = next;
+  }
+  return steps.join("");
+}
 
 function shortestPath(val) {
   if (cache.has(val)) {
     return cache.get(val);
   }
-  let paths = stepsFor(val, arrowcoords, false);
-  let minLength = 100;
-  let maxRepeats = -1;
-  let best = null;
-  for (let p of paths) {
-    if (p.length > minLength)
-      continue;
-    if (p.length < minLength) {
-      minLength = p.length;
-      maxRepeats = -1;
-    }
-    let repeats = 0;
-    for (let i = 1; i < p.length; i++) {
-      if (p[i] == p[i-1])
-        repeats++;
-    }
-    if (repeats == maxRepeats)
-      console.log(val + " " + best + " " + p);
-    if (repeats > maxRepeats) {
-      maxRepeats = repeats;
-      best = p;
-    }
-  }
-  cache.set(val, best);
-  return best;
+  let path = stepsForArrows(val);
+  cache.set(val, path);
+  return path;
 }
 
 function addToMap(map, p, val) {
@@ -148,7 +176,7 @@ function addToMap(map, p, val) {
 }
 
 function doNums(i) {
-  let numpaths = stepsFor(i, numpadcoords, true);
+  let numpaths = stepsForNums(i);
   let paths = []
   for (let p of numpaths) {
     let map = new Map();
@@ -167,30 +195,15 @@ function doArrows(paths) {
     }
     newPaths.push(np);
   }
-
   return newPaths;
-
-  /*let minLength = Number.MAX_SAFE_INTEGER;
-  for (let p of newPaths) {
-    minLength = Math.min(minLength, p.length);
-  }
-  let outPaths = new Set();
-  for (let p of newPaths) {
-    if (p.length == minLength)
-      outPaths.add(p);
-  }
-  return outPaths;*/
 }
 
 function run(inputs, steps) {
   let result = 0;
   for (let i of inputs) {
     let paths = doNums(i);
-    //console.log(structuredClone(paths));
     for (let step = 0; step < steps; step++) {
       paths = doArrows(paths);
-      //console.log(structuredClone(paths
-      //console.log(step);
     }
     minLength = Number.MAX_SAFE_INTEGER;
     for (let p of paths) {
@@ -199,12 +212,9 @@ function run(inputs, steps) {
         length += s[0].length * s[1];
       }
       minLength = Math.min(minLength, length);
-      //console.log(p);
     }
-    //console.log(minLength);
     result += minLength * i.substring(0, i.length - 1);
   }
-  console.log(cache);
   return result;
 }
 
@@ -213,14 +223,6 @@ function part1(inputs) {
 }
 
 function part2(inputs) {
-  // high: 260986506446672
-  // correct test answers:
-  // 029A: 82050061710
-  // 980A: 72242026390
-  // 179A: 81251039228
-  // 456A: 80786362258
-  // 379A: 77985628636
-  // Total 154115708116294
   return run(inputs, 25);
 }
 
