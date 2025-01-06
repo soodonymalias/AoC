@@ -1,0 +1,100 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let vertices = new Set();
+  let edges = new Map();
+  for (let i of inputs) {
+    let s = i.split("-");
+    if (!edges.has(s[0])) {
+      edges.set(s[0], new Set());
+      vertices.add(s[0]);
+    }
+    if (!edges.has(s[1])) {
+      edges.set(s[1], new Set());
+      vertices.add(s[1]);
+    }
+    edges.get(s[0]).add(s[1]);
+    edges.get(s[1]).add(s[0]);
+  }
+  return { edges, vertices: [...vertices] };
+}
+
+function getTriplets(graph) {
+  let triplets = new Set();
+  for (let v1 of graph.vertices) {
+    let edges = graph.edges.get(v1);;
+    for (let v2 of edges) {
+      for (let v3 of edges) {
+        if (v2 == v3)
+          continue;
+        if (!graph.edges.get(v2).has(v3))
+          continue;
+        let trip = [v1, v2, v3];
+        trip.sort();
+        triplets.add(trip.join());
+      }
+    }
+  }
+  return triplets;
+}
+
+function part1(graph) {
+  let triplets = getTriplets(graph);
+  let result = 0;
+  for (let t of triplets) {
+    let has_t = false;
+    for (let s of t.split(",")) {
+      if (s.startsWith("t"))
+        has_t = true;
+    }
+    if (has_t)
+      result++;
+  }
+  return result;
+}
+
+function nextBiggestCliques(graph, cliques) {
+  let next = new Set();
+  for (let clique of cliques) {
+    let c = clique.split(",");
+    for (let v of graph.vertices) {
+      c.push(v);
+      let match = true;
+      for (let i = 0; i < c.length - 1; i++) {
+        let cn = [];
+        for (let j = 0; j < c.length; j++) {
+          if (i == j)
+            continue;
+          cn.push(c[j]);            
+        }
+        cn.sort();
+        if (!cliques.has(cn.join())) {
+          match = false;
+          break;
+        }
+      }
+      if (match) {
+        let n = structuredClone(c);
+        n.sort();
+        next.add(n.join(","));
+      }
+      c.pop();
+    }
+  }
+  return next;
+}
+
+async function part2(graph) {
+  let cliques = getTriplets(graph);
+  // This takes a minute to run. Oh well.
+  while (cliques.size > 1) {
+    cliques = nextBiggestCliques(graph, cliques);
+    console.log(cliques);
+    await scheduler.yield();
+  }
+  return [...cliques][0];
+}
+
+</script>
+</body>
