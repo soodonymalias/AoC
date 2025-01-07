@@ -1,0 +1,97 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let startingValues = [];
+  let gates = [];
+  let wires = new Map();
+
+  let startingValuesDone = false;
+  for (let i of inputs) {
+    if (i.length == 0) {
+      startingValuesDone = true;
+      continue;
+    }
+    if (!startingValuesDone) {
+      let s = i.split(": ");
+      startingValues.push({wire: s[0], value: parseInt(s[1])});
+      continue;
+    }
+    let s = i.split(" ");
+    let gate = {};
+    gate.rule = s[1];
+    gate.inputs = [];
+    gate.out = s[4];
+    gates.push(gate);
+    if (!wires.has(s[0])) {
+      wires.set(s[0], []);
+    }
+    if (!wires.has(s[2])) {
+      wires.set(s[2], []);
+    }
+    wires.get(s[0]).push(gate);
+    wires.get(s[2]).push(gate);
+    
+  }
+  return { startingValues, gates, wires };
+}
+
+function binaryArrayToInt(a) {
+  let resultString = a.reverse().join("");
+  return parseInt(resultString, 2);
+}
+
+function intToBinaryArray(i) {
+  return Number(i).toString(2).split("").reverse();
+}
+
+function part1(device) {
+  let results = [];
+  let todo = structuredClone(device.startingValues);
+  while (todo.length > 0) {
+    let curr = todo.pop();
+    if (curr.wire.startsWith("z")) {
+      results[parseInt(curr.wire.substring(1))] = curr.value;
+      continue;
+    }
+    let gates = device.wires.get(curr.wire);
+    for (let g of gates) {
+      g.inputs.push(curr.value);
+      if (g.inputs.length < 2)
+        continue;
+      let value;
+      if (g.rule == "OR")
+        value = g.inputs[0] || g.inputs[1];
+      if (g.rule == "AND")
+        value = g.inputs[0] && g.inputs[1];
+      if (g.rule == "XOR")
+        value = g.inputs[0] ^ g.inputs[1];
+      todo.push({wire: g.out, value });
+    }
+  }
+  return binaryArrayToInt(results);
+}
+
+function part2(device) {
+  if (window.is_test) return;
+  let xs = [];
+  let ys = [];
+  for (let v of device.startingValues) {
+    if (v.wire.startsWith("x")) {
+      xs[parseInt(v.wire.substring(1))] = v.value;
+    }
+    if (v.wire.startsWith("y")) {
+      ys[parseInt(v.wire.substring(1))] = v.value;
+    }
+  }
+  let zTarget = intToBinaryArray(binaryArrayToInt(xs) + binaryArrayToInt(ys));
+  let z = intToBinaryArray(part1(device));
+  for (let i = 0; i < z.length; i++) {
+    if (z[i] != zTarget[i])
+      console.log(i);
+  }
+  // dvb,fhg,fsq,tnc,vcf,z10,z17,z39
+}
+
+</script>
+</body>
