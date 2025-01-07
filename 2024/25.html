@@ -1,0 +1,49 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let keys = [];
+  let locks = [];
+  for (let i = 0; i < inputs.length; i += 8) {
+    let is_key = inputs[i] == ".....";
+    let item = [];
+    for (let j = 0; j < inputs[i].length; j++) {
+      let hashes = 0;
+      for (let k = i; k < i + 7; k++) {
+        if (inputs[k][j] == "#")
+          hashes++;
+      }
+      item.push(hashes - 1);
+    }
+    if (is_key) {
+      keys.push(item);
+    } else {
+      locks.push(item);
+    }
+  }
+  return {keys, locks};
+}
+
+function part1(input) {
+  let result = 0;
+  for (let k of input.keys) {
+    for (let l of input.locks) {
+      let valid = true;
+      for (let i = 0; i < k.length; i++) {
+        if (k[i] + l[i] >= 6) {
+          valid = false;
+          break;
+        }
+      }
+      if (valid)
+        result++;
+    }
+  }
+  return result;
+}
+
+function part2(inputs) {
+}
+
+</script>
+</body>
