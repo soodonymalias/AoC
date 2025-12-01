@@ -1,0 +1,37 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function part1(inputs) {
+  let curr = 50;
+  let zeroes = 0;
+  for (let i of inputs) {
+    let dir = i[0];
+	let num = parseInt(i.substring(1));
+	if (dir == "L")
+	  num = -num;
+	curr = (curr + 100 + num) % 100;
+	if (curr == 0)
+	  zeroes++;
+  }
+  return zeroes;
+}
+
+function part2(inputs) {
+  let curr = 50;
+  let zeroes = 0;
+  for (let i of inputs) {
+    let dir = i[0];
+	let num = parseInt(i.substring(1));
+	if (num > 100)
+	  zeroes += Math.floor(num / 100);
+	num = num % 100;
+
+	if (dir == "L")
+	  num = -num;
+	if (curr != 0 && (curr + num <= 0 || curr + num >= 100)) zeroes++;
+	curr = (curr + 100 + num) % 100;
+  }
+  return zeroes;
+}
+</script>
+</body>
