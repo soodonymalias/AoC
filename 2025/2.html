@@ -1,0 +1,76 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+//function preprocessInput(inputs) {
+//  return toGrid(inputs, ",", "parseInt");
+//}
+
+function getResult(ids, ranges) {
+  let result = 0;
+  for (let id of ids) {
+    for (let r of ranges) {
+	  if (r.min <= id && id <= r.max)
+	    result += id;
+	}
+  }
+  return result;
+}
+
+function part1(inputs) {
+  let pairs = inputs[0].split(",");
+  let max = 0;
+  let ranges = [];
+
+  for (let p of pairs) {
+    let p_min = parseInt(p.split("-")[0]);
+	let p_max = parseInt(p.split("-")[1]);
+    max = Math.max(max, p_max);
+	ranges.push({ min: p_min, max: p_max });
+  }
+  let i = 1;
+  let ids = new Set();
+  while (true) {
+    let id = parseInt(i + "" + i);
+    ids.add(id);
+	if (id > max) break;
+	i++;
+  }
+  return getResult(ids, ranges);
+}
+
+function part2(inputs) {
+  let pairs = inputs[0].split(",");
+  let max = 0;
+  let ranges = [];
+
+  for (let p of pairs) {
+    let p_min = parseInt(p.split("-")[0]);
+	let p_max = parseInt(p.split("-")[1]);
+    max = Math.max(max, p_max);
+	ranges.push({ min: p_min, max: p_max });
+  }
+  let i = 1;
+  let ids = new Set();
+  while (true) {
+    let j = 2;
+	let atleastone = false;
+	while (true) {
+	  let id = "";
+	  for (let k = 0; k < j; k++) {
+	    id += i;
+      }
+	  id = parseInt(id);
+	  if (id > max) break;
+      ids.add(id);
+	  atleastone = true;
+	  j++;
+	}
+	if (!atleastone) break;
+	i++;
+  }
+
+  return getResult(ids, ranges);
+}
+
+</script>
+</body>
