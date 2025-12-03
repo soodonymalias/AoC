@@ -1,0 +1,37 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  return toGrid(inputs, "", "parseInt");
+}
+
+function recurse(row, start, remaining) {
+  let max = 0;
+  let maxI = 0;
+  for (let i = start; i < row.length - remaining; i++) {
+  if (row[i] <= max) continue;
+    max = row[i];
+    maxI = i;
+  }
+  let next = remaining == 0 ? "" : recurse(row, maxI + 1, remaining - 1);
+  return max + next;
+}
+
+function solve(grid, digits) {
+  let total = 0;
+  for (let row of grid) {
+    total += parseInt(recurse(row, 0, digits - 1));
+  }
+  return total;
+}
+
+function part1(grid) {
+  return solve(grid, 2);
+}
+
+function part2(grid) {
+  return solve(grid, 12);
+}
+
+</script>
+</body>
