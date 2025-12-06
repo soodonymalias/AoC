@@ -1,0 +1,56 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  return toGrid(inputs, "");
+}
+
+function isAccesible(grid, i, j) {
+  if (grid[i][j] != "@") return false;
+
+  let n = 0;
+  for (let ix = -1; ix <= 1; ix++) {
+	for (let jx = -1; jx <= 1; jx++) {
+	  if (i + ix < 0 || i + ix >= grid.length) continue;
+	  if (j + jx < 0 || j + jx >= grid[i].length) continue;
+	  if (grid[i + ix][j + jx] == "@") n++;
+	}
+  }
+  return n <= 4;
+}
+
+function take(grid) {
+  let taken = 0;
+  for (let i = 0; i < grid.length; i++) {
+    for (let j = 0; j < grid[i].length; j++) {
+	  if (isAccesible(grid, i, j)) {
+	    grid[i][j] = ".";
+		taken++;
+	  }
+	}
+  }
+  return taken;
+}
+
+function part1(grid) {
+  let acc = 0;
+  for (let i = 0; i < grid.length; i++) {
+    for (let j = 0; j < grid[i].length; j++) {
+	  if (isAccesible(grid, i, j)) acc++;
+	}
+  }
+  return acc;
+}
+
+function part2(grid) {
+  let taken = 0;
+  let next = take(grid);
+  while (next != 0) {
+    taken += next;
+    next = take(grid);
+  }
+  return taken;
+}
+
+</script>
+</body>
