@@ -1,0 +1,60 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let ranges = [];
+  let ids = [];
+  let rangesDone = false;
+  for (let i of inputs) {
+    if (i.length == 0) {
+	  rangesDone = true;
+	  continue;
+	}
+	if (!rangesDone) {
+	  let s = i.split("-");
+	  ranges.push([parseInt(s[0]), parseInt(s[1])]);
+	} else {
+	  ids.push(parseInt(i));
+	}
+  }
+  return { ids, ranges };
+}
+
+function part1(inputs) {
+  let fresh = 0;
+  for (let i of inputs.ids) {
+    for (let r of inputs.ranges) {
+	  if (i >= r[0] && i <= r[1]) {
+	    fresh++;
+		break;
+	  }
+	}
+  }
+  return fresh;
+}
+
+function part2(inputs) {
+  let ranges = inputs.ranges;
+
+  while (true) {
+	let length = ranges.length;
+	for (let i = 0; i < ranges.length; i++) {
+	  for (let j = ranges.length - 1; j > i; j--) {
+	    if (ranges[i][1] < ranges[j][0]) continue;
+		if (ranges[j][1] < ranges[i][0]) continue;
+		ranges[i][0] = Math.min(ranges[i][0], ranges[j][0]);
+		ranges[i][1] = Math.max(ranges[i][1], ranges[j][1]);
+		ranges[j] = ranges[ranges.length - 1];
+		ranges.pop();
+	  }
+	}
+	if (length == ranges.length) break;
+  }
+  let result = 0;
+  for (let r of ranges) {
+    result += (1 + r[1] - r[0]);
+  }
+  return result;
+}
+</script>
+</body>
