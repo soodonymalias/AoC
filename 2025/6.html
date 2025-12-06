@@ -1,0 +1,73 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function calculate(equations) {
+  let result = 0;
+  for (let e of equations) {
+    if (e.op == "+") {
+	  for (let v of e.vals) {
+	    result += v;
+	  }
+	} else if (e.op == "*") {
+	  let product = 1;
+	  for (let v of e.vals) {
+	    product *= v;
+	  }
+	  result += product;
+	}
+  }
+  return result;
+}
+
+function part1(inputs) {
+  let equations;
+  for (let i of inputs) {
+    let parts = i.split(/\s+/);
+	if (parts[0] == '') parts.shift();
+	if (parts[parts.length - 1] == '') parts.pop();
+
+	if (equations === undefined) {
+	  equations = new Array(parts.length);
+	  for (let p = 0; p < parts.length; p++) {
+	    equations[p] = { vals: [] };
+	  }
+	}
+	for (let p = 0; p < parts.length; p++) {
+	  if (isNaN(parts[p])) {
+	    equations[p].op = parts[p];
+	  } else {
+	    equations[p].vals.push(parseInt(parts[p]));
+	  }
+	}
+  }
+  return calculate(equations);
+}
+
+function part2(inputs) {
+  let equations = [];
+  let eq = { vals: [] };
+  for (let j = 0; j < inputs[0].length; j++) {
+    let emptyColumn = true;
+	let value = "";
+    for (let i = 0; i < inputs.length; i++) {
+	  if (inputs[i][j] == " ") continue;
+	  emptyColumn = false;
+	  if (isNaN(inputs[i][j])) {
+	    eq.op = inputs[i][j];
+		continue;
+	  }
+	  value += inputs[i][j];
+	}
+	if (emptyColumn) {
+	  equations.push(eq);
+	  eq = { vals: [] };
+	} else {
+	  eq.vals.push(parseInt(value));
+	}
+  }
+  equations.push(eq);
+  return calculate(equations);
+}
+
+</script>
+</body>
