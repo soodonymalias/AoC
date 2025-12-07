@@ -1,0 +1,70 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  return toGrid(inputs, "");
+}
+
+function part1(grid) {
+  let toProcess = [];
+  for (let j = 0; j < grid[0].length; j++) {
+    if (grid[0][j] == "S") {
+	  toProcess.push(j);
+	  break;
+	}
+  }
+
+  let splits = 0;
+  for (let i = 1; i < grid.length - 1; i++) {
+    let toProcessNext = [];
+	for (let j of toProcess) {
+	  if (grid[i+1][j] == ".") {
+		if (!toProcessNext.includes(j))
+	      toProcessNext.push(j);
+	  } else {
+	    splits++;
+		if (!toProcessNext.includes(j-1))
+	      toProcessNext.push(j-1);
+		if (!toProcessNext.includes(j+1))
+	      toProcessNext.push(j+1);
+	  }
+	}
+	toProcess = toProcessNext;
+  }
+  return splits;
+}
+
+function part2(grid) {
+  let toProcess = new Map();
+  for (let j = 0; j < grid[0].length; j++) {
+    if (grid[0][j] == "S") {
+	  toProcess.set(j, 1);
+	  break;
+	}
+  }
+
+  let splits = 0;
+  for (let i = 1; i < grid.length - 1; i++) {
+    let toProcessNext = new Map();
+	for (let [j, count] of toProcess.entries()) {
+	  if (grid[i+1][j] == ".") {
+	    let nextCount = toProcessNext.has(j) ? toProcessNext.get(j) : 0;
+		toProcessNext.set(j, nextCount + count);
+	  } else {
+	    let nextCountMinus = toProcessNext.has(j-1) ? toProcessNext.get(j-1) : 0;
+		toProcessNext.set(j-1, nextCountMinus + count);
+	    let nextCountPlus = toProcessNext.has(j+1) ? toProcessNext.get(j+1) : 0;
+		toProcessNext.set(j+1, nextCountPlus + count);
+	  }
+	}
+	toProcess = toProcessNext;
+  }
+  let result = 0;
+  for (let c of toProcess.values()) {
+    result += c;
+  }
+  return result;
+}
+
+</script>
+</body>
