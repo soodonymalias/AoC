@@ -1,0 +1,67 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let points = [];
+  for (let i = 0 ; i < inputs.length; i++) {
+    let s = inputs[i].split(",");
+	points.push({x: parseInt(s[0]), y: parseInt(s[1]), z: parseInt(s[2]), set: i })
+  }
+  let connections = [];
+  for (let i = 0; i < points.length; i++) {
+    for (let j = i + 1; j < points.length; j++) {
+      let dist = Math.pow(points[i].x - points[j].x, 2) + Math.pow(points[i].y - points[j].y, 2) + Math.pow(points[i].z - points[j].z, 2);
+	  connections.push({i, j, dist});
+    }
+  }
+  connections.sort((a,b) => a.dist - b.dist);
+  return { points, connections };
+}
+
+function part1(input) {
+  let points = input.points;
+  let connections = input.connections;
+
+  let steps = window.is_test ? 10 : 1000;
+  for (let s = 0; s < steps; s++) {
+    let c = connections.shift();
+	if (points[c.i].set == points[c.j].set) continue;
+    let max_set = Math.max(points[c.j].set, points[c.i].set);
+	let min_set = Math.min(points[c.j].set, points[c.i].set);
+	for (let p of points) {
+	  if (p.set == max_set)
+	      p.set = min_set;
+	}
+  }
+
+  let sizes = new Array(points.length).fill(0);
+  for (let p of points) {
+    sizes[p.set]++;
+  }
+  sizes.sort((a,b) => b - a);
+  return sizes[0] * sizes[1] * sizes[2];
+}
+
+function part2(input) {
+  let points = input.points;
+  let connections = input.connections;
+  let steps = window.is_test ? 10 : 1000;
+  while (true) {
+    let c = connections.shift();
+	if (points[c.i].set == points[c.j].set) continue;
+    let max_set = Math.max(points[c.j].set, points[c.i].set);
+	let min_set = Math.min(points[c.j].set, points[c.i].set);
+	let all_same = true;
+	for (let p of points) {
+	  if (p.set == max_set)
+	    p.set = min_set;
+	  else if (p.set != min_set)
+	    all_same = false;
+	}
+	if (all_same)
+	  return points[c.i].x * points[c.j].x;
+  }
+}
+
+</script>
+</body>
