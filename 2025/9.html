@@ -1,0 +1,191 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script src="/helpers/print_bitmap.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let points = []
+  for (let i of inputs) {
+    s = i.split(",");
+	points.push({x: parseInt(s[0]), y: parseInt(s[1])});
+  }
+  return points;
+}
+
+function part1(points) {
+  let largest = 0;
+  for (let i = 0; i < points.length; i++) {
+    for (let j = i + 1; j < points.length; j++) {
+	  let x = Math.abs(points[i].x - points[j].x) + 1;
+	  let y = Math.abs(points[i].y - points[j].y) + 1;
+	  largest = Math.max(largest, x * y);
+	}
+  }
+  return largest;
+}
+
+function part2(points) {
+  if (window.is_test) return;
+  let grid_size = 100;
+  let divisor = 100000 / grid_size;
+  let grid = new Array(grid_size);
+  for (let i = 0; i < grid_size; i++) {
+    grid[i] = new Array(grid_size).fill(false);
+  }
+  let fixedPoints = [];
+  for (let i = 0; i < points.length; i++) {
+    let p1 = points[(i + points.length - 1) % points.length];
+	let p2 = points[i];
+	if (p1.x == p2.x) {
+	  let min = Math.floor(Math.min(p1.y, p2.y) / divisor);
+	  let max = Math.floor(Math.max(p1.y, p2.y) / divisor);
+	  let x = Math.floor(p1.x / divisor);
+	  for (let y = min; y <= max; y++) {
+	    grid[y][x] = true;
+	  }
+	} else {
+	  let min = Math.floor(Math.min(p1.x, p2.x) / divisor);
+	  let max = Math.floor(Math.max(p1.x, p2.x) / divisor);
+	  let y = Math.floor(p1.y / divisor);
+	  for (let x = min; x <= max; x++) {
+	    grid[y][x] = true;
+	  }
+	  if (Math.abs(p1.x - p2.x) > 50000) {
+	    fixedPoints.push({x: Math.max(p1.x, p2.x), y: p1.y});
+	  }
+	}
+  }
+
+  let lowY = Math.min(fixedPoints[0].y, fixedPoints[1].y);
+  let highY = Math.max(fixedPoints[0].y, fixedPoints[1].y);
+  let low = lowY == fixedPoints[0].y ? fixedPoints[0] : fixedPoints[1];
+  let high = lowY == fixedPoints[0].y ? fixedPoints[1] : fixedPoints[0];
+  let lowPoints = [];
+  let highPoints = [];
+
+  for (let p of points) {
+    if (p.y < lowY) {
+	  lowPoints.push(p);
+	} else if (p.y > highY) {
+	  highPoints.push(p);
+	}
+  }
+  highPoints.reverse();
+  highPoints.shift();
+
+  let start = 0;
+  let end = lowPoints.length - 1;
+  let maxArea = 0;
+  while (start < end) {
+    let y = low.y - Math.max(lowPoints[start].y, lowPoints[end].y);
+	let x = lowPoints[end].x - lowPoints[start].x;
+    maxArea = Math.max(maxArea, y*x);
+	if (lowPoints[start].y > lowPoints[end].y) {
+	  let oldX = lowPoints[start].x;
+	  start++;
+	  while (lowPoints[start].x < oldX) {
+	    start++
+	  }
+	} else {
+	  let oldX = lowPoints[end].x;
+	  end--;
+	  while (lowPoints[end].x > oldX) {
+	    end--;
+	  }
+	}
+  }
+
+  start = 0;
+  end = highPoints.length - 1;
+  while (start < end) {
+    let y = high.y - Math.min(highPoints[start].y, highPoints[end].y);
+	let x = highPoints[end].x - highPoints[start].x;
+    maxArea = Math.max(maxArea, y*x);
+	if (highPoints[start].y < highPoints[end].y) {
+	  let oldX = highPoints[start].x;
+	  start++;
+	  while (highPoints[start].x < oldX) {
+	    start++
+	  }
+	} else {
+	  let oldX = highPoints[end].x;
+	  end--;
+	  while (highPoints[end].x > oldX) {
+	    end--;
+	  }
+	}
+  }
+
+  /*let highestX = 0;
+  let newLowPoints = []
+  for (let p of lowPoints) {
+    if (p.x > low.x) break;
+    if (p.x < highestX) continue;
+	highestX = p.x;
+    newLowPoints.push(p);
+  }
+  lowPoints = newLowPoints;
+  lowPoints.reverse();
+  newLowPoints = []
+  let highestY = 0;
+  for (let p of lowPoints) {
+    if (p.y < highestY) continue;
+	highestY = p.y;
+    newLowPoints.push(p);
+  }
+  newLowPoints.reverse();
+  lowPoints = newLowPoints;*/
+
+
+  /*highestX = 0;
+  let newHighPoints = []
+  for (let p of highPoints) {
+    if (p.x > high.x) break;
+    if (p.x < highestX) continue;
+	highestX = p.x;
+    newHighPoints.push(p);
+  }
+  highPoints = newHighPoints;
+  highPoints.reverse();
+  newHighPoints = []
+  let lowestY = 100000;
+  for (let p of highPoints) {
+    if (p.y > lowestY) continue;
+	lowestY = p.y;
+    newHighPoints.push(p);
+  }
+  newHighPoints.reverse();
+  highPoints = newHighPoints;*/
+
+  /*let maxArea = 0;
+  //let highestX = 0;
+  for (let p of lowPoints) {
+    //if (p.x > low.x) break;
+    //if (p.x < highestX) continue;
+	//highestX = p.x;
+	if ((low.x - p.x) * (low.y - p.y) < 0) throw new Error("WTF");
+	maxArea = Math.max(maxArea, (low.x - p.x) * (low.y - p.y));
+  }*/
+
+  //highestX = 0;
+  /*for (let p of highPoints) {
+    //if (p.x > high.x) continue;
+    //if (p.x < highestX) continue;
+	//highestX = p.x;
+	if ((high.x - p.x) * (p.y - high.y) < 0) throw new Error("WTF");
+	maxArea = Math.max(maxArea, (high.x - p.x) * (p.y - high.y));
+  }*/
+  // wrong: 2839391840
+  //        2861552320
+  // high: 2333405323
+  // 1470511006
+  // 2261826637
+
+  console.log(low);
+  console.log(lowPoints);
+  //console.log(highPoints);
+  printBitmap(grid, grid_size, grid_size);
+  return maxArea;
+}
+
+</script>
+</body>
