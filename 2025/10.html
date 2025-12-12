@@ -1,0 +1,127 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function preprocessInput(inputs) {
+  let machines = [];
+  for (let i of inputs) {
+    let m = {};
+	let s = i.split(" ");
+
+	let l = s[0].substring(1, s[0].length - 1);
+	m.lights = []
+	for (let light of l) {
+	  m.lights.push(light == "#");
+	}
+
+    m.switches = new Array(s.length - 2);
+	for (let sw = 0; sw < m.switches.length; sw++) {
+	  let swit = s[sw+1].substring(1, s[sw+1].length - 1);
+	  let swit_split = swit.split(",");
+	  m.switches[sw] = [];
+	  for (let sp of swit_split) {
+	    m.switches[sw].push(parseInt(sp));
+	  }
+	}
+	m.switches.sort((a,b) => b.length - a.length);
+
+    let joltages = s[s.length-1].substring(1, s[s.length-1].length - 1).split(",");
+    m.joltages = [];
+	for (let j of joltages) {
+	  m.joltages.push(parseInt(j));
+	}
+
+    machines.push(m);
+  }
+  return machines;
+}
+
+function solveMachineLights(machine) {
+  let toTry = [{lights : new Array(machine.lights.length).fill(false), steps: 0, last : -1 }];
+  while (toTry.length > 0) {
+	let curr = toTry.shift();
+	let nextSteps = curr.steps + 1;
+	for (let i = curr.last + 1; i < machine.switches.length; i++) {
+	  let swit = machine.switches[i];
+	  let lights = [...curr.lights];
+	  for (let s of swit) {
+	    lights[s] = !lights[s];
+	  }
+	  let match = true;
+	  for (let l = 0; l < lights.length; l++) {
+	    if (lights[l] != machine.lights[l]) {
+	      match = false;
+		  break;
+		}
+      }
+	  if (match)
+	    return nextSteps;
+	  toTry.push({lights, steps: nextSteps, last: i });
+	}
+  }
+  throw new Error("No match");
+}
+
+function solveMachineJoltages(machine) {
+  let toTry = [{joltages : machine.joltages, steps: 0, last : -1 }];
+
+  let best = 0;
+  for (let j of machine.joltages) {
+    best += j;
+  }
+
+  while (toTry.length > 0) {
+	let curr = toTry.pop();
+	curr.last++;
+	if (curr.last == machine.switches.length) continue;
+	if (curr.step >= best) continue;
+
+	while (true) {
+	  curr.steps++;
+	  let done = false;
+	  for (let s of machine.switches[curr.last]) {
+	    if (curr.joltages[s] == 0) {
+		  done = true;
+		  break;
+		}
+        curr.joltages[s]--;
+	  }
+	  if (done) break;
+
+	  let match = true;
+	  for (let j = 0; j < curr.joltages.length; j++) {
+	    if (curr.joltages[j] != 0) {
+	      match = false;
+		  break;
+		}
+      }
+	  if (match) {
+	    best = Math.min(best, curr.steps - 1);
+		continue;
+	  }
+	  toTry.push({joltages: [...curr.joltages], steps: curr.steps, last: curr.last });
+	}
+  }
+  return best;
+}
+
+function part1(machines) {
+  let steps = 0;
+  for (let machine of machines) {
+    steps += solveMachineLights(machine);
+  }
+  return steps;
+}
+
+async function part2(machines) {
+  let steps = 0;
+  for (let machine of machines) {
+    steps += solveMachineJoltages(machine);
+	console.log(steps);
+	console.log(machine);
+	break;
+  }
+  return steps;
+}
+
+</script>
+</body>
