@@ -1,0 +1,78 @@
+<body>
+<script src="/helpers/runner.js"></script>
+<script>
+function buildGraphWithBackEdges(inputs) {
+  let graph = new Map();
+  for (let i of inputs) {
+    graph.set(i.substring(0, 3), { in: new Set(), out: new Set(), inPaths: 0,});
+  }
+  graph.set("out", { in: new Set(), out: new Set(), inPaths: 0});
+
+  for (let i of inputs) {
+    let curr = i.substring(0, 3);
+    let split = i.split(" ");
+	split.shift();
+    for (let e of split) {
+	  graph.get(curr).out.add(e);
+	  if (e != "out")
+	    graph.get(e).in.add(curr);
+	}
+  }
+  return graph;
+}
+
+function goPart1(vertices, curr) {
+  if (curr == "out")
+    return 1;
+
+  let edges = vertices.get(curr);
+  let result = 0;
+  for (let e of edges) {
+    result += goPart1(vertices, e);
+  }
+  return result;
+}
+
+function part1(inputs) {
+  let vertices = new Map();
+  for (let i of inputs) {
+    let v_label = i.substring(0, 3);
+    let split = i.split(" ");
+	split.shift();
+	vertices.set(v_label, split);
+  }
+  if (!vertices.has("you")) return;
+  return goPart1(vertices, "you");
+}
+
+function part2(inputs) {
+  let graph = buildGraphWithBackEdges(inputs);
+
+  graph.get("svr").inPaths = 1;
+  let q = ["svr"];
+  let paths = 0;
+  while (q.length > 0) {
+    let curr = q.shift();
+	let currV = graph.get(curr);
+	if (curr == "fft" || curr == "dac") {
+	  for (let entry of graph.entries()) {
+	    if (entry[0] != curr) {
+		  entry[1].inPaths = 0;
+		}
+	  }
+	}
+
+	for (let e of currV.out) {
+	  let v = graph.get(e);
+	  v.inPaths += currV.inPaths;
+	  v.in.delete(curr);
+	  if (v.in.size == 0) {
+	    q.push(e);
+	  }
+	}
+  }
+  return  graph.get("out").inPaths;
+}
+
+</script>
+</body>
